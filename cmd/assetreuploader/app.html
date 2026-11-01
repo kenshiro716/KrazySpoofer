@@ -252,7 +252,6 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
     <label class="setting"><input type="checkbox" id="skipPublic"> Skip public assets</label>
     <div class="config-field"><b>Comma separated list of group IDs to skip</b><small>Assets from these groups are not reuploaded</small><input type="text" id="skipGroups" placeholder="e.g., 123,456,789"></div>
     <div class="config-field"><b>Comma separated list of user IDs to skip</b><small>Assets from these users are not reuploaded</small><input type="text" id="skipUsers" placeholder="e.g., 123,456,789"></div>
-    <div class="config-field"><b>Custom Asset Description</b><small>Set on reuploaded animations and meshes. Audio has no description field.</small><textarea id="assetDescription" placeholder="Enter a custom asset description..."></textarea></div>
     <div class="config-field"><b>Custom Product Description</b><small>Replaces gamepass and developer product descriptions. Leave empty to keep the originals.</small><textarea id="productDescription" placeholder="Enter a custom product description..."></textarea></div>
     <div style="margin-top:20px"><button class="btn primary" id="saveConfig">Save</button></div>
     <div class="message" id="configMessage"></div>
@@ -355,7 +354,6 @@ async function loadSettings() {
   $("skipPublic").checked = s.skipPublic;
   $("skipGroups").value = (s.skipGroupIds || []).join(",");
   $("skipUsers").value = (s.skipUserIds || []).join(",");
-  $("assetDescription").value = s.assetDescription || "";
   $("productDescription").value = s.productDescription || "";
 }
 
@@ -365,7 +363,6 @@ $("saveConfig").addEventListener("click", async () => {
     skipPublic: $("skipPublic").checked,
     skipGroupIds: parseIDs($("skipGroups").value),
     skipUserIds: parseIDs($("skipUsers").value),
-    assetDescription: $("assetDescription").value,
     productDescription: $("productDescription").value,
   }) }, "configMessage");
   if (response.ok) say("Saved.", true, "configMessage");

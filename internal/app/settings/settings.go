@@ -11,23 +11,22 @@ import (
 
 const settingsFile = "krazyspoofer-settings.json"
 
-const defaultAssetDescription = "Made By Ranji"
+// AssetDescription is set on every animation and mesh this tool uploads.
+const AssetDescription = "Made By Ranji"
 
 type Settings struct {
 	SkipOwned          bool    `json:"skipOwned"`
 	SkipPublic         bool    `json:"skipPublic"`
 	SkipUserIDs        []int64 `json:"skipUserIds"`
 	SkipGroupIDs       []int64 `json:"skipGroupIds"`
-	AssetDescription   string  `json:"assetDescription"`
 	ProductDescription string  `json:"productDescription"`
 }
 
 var (
 	mutex   sync.RWMutex
 	current = Settings{
-		SkipOwned:        true,
-		SkipPublic:       true,
-		AssetDescription: defaultAssetDescription,
+		SkipOwned:  true,
+		SkipPublic: true,
 	}
 )
 

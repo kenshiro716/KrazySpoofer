@@ -159,7 +159,7 @@ func Reupload(ctx *context.Context, r *request.Request) {
 			return
 		}
 
-		uploadHandler, err := ide.NewUploadAnimationHandler(client, assetInfo.Name, settings.Get().AssetDescription, assetData, groupID)
+		uploadHandler, err := ide.NewUploadAnimationHandler(client, assetInfo.Name, settings.AssetDescription, assetData, groupID)
 		if err != nil {
 			newUploadError("Failed to get upload handler", assetInfo, err)
 			return
