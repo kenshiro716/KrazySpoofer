@@ -17,6 +17,7 @@ import (
 	"strings"
 	"sync"
 
+	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/assetutils"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/settings"
@@ -172,6 +173,8 @@ func (a *appServer) open(w http.ResponseWriter, r *http.Request) {
 	if quota, err := publish.GetAudioQuota(a.client); err == nil {
 		status.Quota = &quota
 	}
+
+	assetutils.ClearAssetsInfoCache()
 
 	a.mutex.Lock()
 	a.status, a.data, a.ids, a.lines = status, data, ids, nil

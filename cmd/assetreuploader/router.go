@@ -8,6 +8,7 @@ import (
 	"time"
 
 	"github.com/kenshiro716/KrazySpoofer/internal/app/assets"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/assetutils"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
 	"github.com/kenshiro716/KrazySpoofer/internal/color"
@@ -93,6 +94,8 @@ func serve(c *roblox.Client) error {
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
+
+		assetutils.ClearAssetsInfoCache()
 
 		startReupload, err := assets.NewReuploadHandlerWithType(req.AssetType, c, &req, resp)
 		if err != nil {
