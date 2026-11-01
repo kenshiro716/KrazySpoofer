@@ -14,10 +14,13 @@ import (
 
 const AssetsInfoChunkSize int = 50
 
+// Asset info checks per minute, at up to 50 ids each.
+const assetsInfoChunksPerMinute = 300
+
 type AssetsInfoResult = taskqueue.TaskResult[develop.GetAssetsInfoResponse]
 
 func GetAssetsInfoInChunks(ctx *context.Context, r *request.Request) []chan AssetsInfoResult {
-	queue := taskqueue.New[develop.GetAssetsInfoResponse](time.Minute, 100)
+	queue := taskqueue.New[develop.GetAssetsInfoResponse](time.Minute, assetsInfoChunksPerMinute)
 
 	newAssetsInfoHandler := func(ids []int64) func() (develop.GetAssetsInfoResponse, error) {
 		return func() (develop.GetAssetsInfoResponse, error) {
@@ -27,7 +30,7 @@ func GetAssetsInfoInChunks(ctx *context.Context, r *request.Request) []chan Asse
 			}
 
 			return retry.Do(
-				retry.NewOptions(retry.Tries(3)),
+				retry.NewOptions(retry.Tries(5)),
 				func(try int) (develop.GetAssetsInfoResponse, error) {
 					ctx.PauseController.WaitIfPaused()
 					if try > 1 {

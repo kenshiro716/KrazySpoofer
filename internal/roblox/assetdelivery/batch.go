@@ -88,12 +88,16 @@ func NewBatchHandler(c *roblox.Client, body []*AssetRequestItem, placeID ...int6
 		placeIDValue = placeID[0]
 	}
 
-	req, err := newBatchRequest(body, placeIDValue)
-	if err != nil {
+	if _, err := newBatchRequest(body, placeIDValue); err != nil {
 		return func() ([]*AssetLocation, error) { return nil, nil }, err
 	}
 
 	return func() ([]*AssetLocation, error) {
+		// A request body can only be read once, so every retry needs a new request.
+		req, err := newBatchRequest(body, placeIDValue)
+		if err != nil {
+			return nil, err
+		}
 		req.AddCookie(&http.Cookie{
 			Name:  ".ROBLOSECURITY",
 			Value: c.Cookie,

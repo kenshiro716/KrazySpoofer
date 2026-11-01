@@ -1,6 +1,8 @@
 package assetutils
 
 import (
+	"fmt"
+
 	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
@@ -19,7 +21,11 @@ func NewFilter(ctx *context.Context, r *request.Request, assetTypeID int32) func
 			}
 
 			assetCreatorID := info.Creator.TargetID
-			if assetCreatorID == creatorID || assetCreatorID == 1 || (checkUserID && assetCreatorID == userID) {
+			if assetCreatorID == 1 {
+				continue
+			}
+			if assetCreatorID == creatorID || (checkUserID && assetCreatorID == userID) {
+				ctx.Logger.Info(fmt.Sprintf("Already owned, skipped: %s(%d)", info.Name, info.ID))
 				continue
 			}
 

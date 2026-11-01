@@ -54,12 +54,16 @@ func newUpdatePermissionsRequest(assetID int64, body PermissionRequest) (*http.R
 }
 
 func NewUpdatePermissionsHandler(c *roblox.Client, assetID int64, body PermissionRequest) (func() (*PermissionResponse, error), error) {
-	req, err := newUpdatePermissionsRequest(assetID, body)
-	if err != nil {
+	if _, err := newUpdatePermissionsRequest(assetID, body); err != nil {
 		return func() (*PermissionResponse, error) { return nil, nil }, err
 	}
 
 	return func() (*PermissionResponse, error) {
+		// A request body can only be read once, so every retry needs a new request.
+		req, err := newUpdatePermissionsRequest(assetID, body)
+		if err != nil {
+			return nil, err
+		}
 		req.AddCookie(&http.Cookie{
 			Name:  ".ROBLOSECURITY",
 			Value: c.Cookie,

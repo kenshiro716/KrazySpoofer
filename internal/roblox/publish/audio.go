@@ -54,7 +54,8 @@ func newUploadAudioRequest(name string, data *bytes.Buffer, groupID ...int64) (*
 	var buffer bytes.Buffer
 	encoder := base64.NewEncoder(base64.StdEncoding, &buffer)
 	size := int64(data.Len())
-	if _, err := io.Copy(encoder, data); err != nil {
+	// Read through a new reader so retries still have the file data.
+	if _, err := io.Copy(encoder, bytes.NewReader(data.Bytes())); err != nil {
 		return nil, err
 	}
 	if err := encoder.Close(); err != nil {
@@ -86,12 +87,16 @@ func newUploadAudioRequest(name string, data *bytes.Buffer, groupID ...int64) (*
 }
 
 func NewUploadAudioHandler(c *roblox.Client, name string, data *bytes.Buffer, groupID ...int64) (func() (*publishAudioResponse, error), error) {
-	req, err := newUploadAudioRequest(name, data, groupID...)
-	if err != nil {
+	if _, err := newUploadAudioRequest(name, data, groupID...); err != nil {
 		return func() (*publishAudioResponse, error) { return nil, nil }, err
 	}
+	currentName := name
 
 	return func() (*publishAudioResponse, error) {
+		req, err := newUploadAudioRequest(currentName, data, groupID...)
+		if err != nil {
+			return nil, err
+		}
 		req.AddCookie(&http.Cookie{
 			Name:  ".ROBLOSECURITY",
 			Value: c.Cookie,
@@ -117,7 +122,7 @@ func NewUploadAudioHandler(c *roblox.Client, name string, data *bytes.Buffer, gr
 
 			message := response.Errors[0].Message
 			if message == "Audio name or description is moderated." {
-				req, _ = newUploadAudioRequest("[Censored]", data, groupID...)
+				currentName = "[Censored]"
 				return nil, UploadAudioErrors.ErrModerated
 			}
 

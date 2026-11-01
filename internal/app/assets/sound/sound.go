@@ -311,6 +311,7 @@ func Reupload(ctx *context.Context, r *request.Request) {
 		placeCache, err := getCreatorPlaceCache(creatorID, creatorType)
 		if err != nil {
 			newBatchError(len(creatorAssets), "Failed to get creator places", err)
+			return
 		}
 
 		assetInfoMap := make(map[int64]*develop.AssetInfo)

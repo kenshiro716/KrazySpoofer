@@ -4,7 +4,6 @@ package mesh
 import (
 	"errors"
 	"fmt"
-	"net"
 	"sync"
 	"sync/atomic"
 	"time"
@@ -24,6 +23,13 @@ import (
 
 const assetTypeID int32 = 4
 
+// Meshes use the same create endpoint as animations, so they share its limits.
+const meshStartsPerMinute = 420
+const meshMaxConcurrentUploads = 24
+const meshUploadRetryTries = 5
+const meshRateLimitMinBackoff = 2 * time.Second
+const meshRateLimitMaxBackoff = time.Minute
+
 var ErrUnauthorized = errors.New("authentication required to access asset")
 
 func Reupload(ctx *context.Context, r *request.Request) {
@@ -41,7 +47,7 @@ func Reupload(ctx *context.Context, r *request.Request) {
 	}
 
 	filter := assetutils.NewFilter(ctx, r, assetTypeID)
-	uploadQueue := taskqueue.New[int64](time.Minute, 3000)
+	uploadQueue := taskqueue.NewSmoothQueue[int64](meshMaxConcurrentUploads, meshStartsPerMinute)
 
 	logger.Println("Reuploading meshes...")
 
@@ -75,7 +81,7 @@ func Reupload(ctx *context.Context, r *request.Request) {
 
 		res := <-uploadQueue.QueueTask(func() (int64, error) {
 			return retry.Do(
-				retry.NewOptions(retry.Tries(3)),
+				retry.NewOptions(retry.Tries(meshUploadRetryTries)),
 				func(try int) (int64, error) {
 					pauseController.WaitIfPaused()
 					if try > 1 {
@@ -91,11 +97,15 @@ func Reupload(ctx *context.Context, r *request.Request) {
 						clientutils.GetNewCookie(ctx, r, "cookie expired")
 					} else if err == ide.UploadMeshErrors.ErrInappropriateName {
 						assetInfo.Name = fmt.Sprintf("(%s) [Censored]", assetInfo.Name)
-					} else {
-						switch err.(type) {
-						case *net.OpError, *net.DNSError:
-							uploadQueue.Limiter.Decrement()
+					} else if errors.Is(err, ide.ErrRateLimited) {
+						wait := meshRateLimitMinBackoff
+						var rle *ide.RateLimitError
+						if errors.As(err, &rle) && rle.RetryAfter > wait {
+							wait = rle.RetryAfter
 						}
+						wait = min(wait, meshRateLimitMaxBackoff)
+						uploadQueue.Chill(wait)
+						time.Sleep(wait)
 					}
 
 					return 0, &retry.ContinueRetry{Err: err}
@@ -182,6 +192,12 @@ func Reupload(ctx *context.Context, r *request.Request) {
 
 			if errors := locationInfo.Errors; errors != nil {
 				newUploadError("Failed to get asset location for", assetInfo, errors[0].Message)
+				uploadWG.Done()
+				continue
+			}
+
+			if len(locationInfo.Locations) == 0 {
+				newUploadError("Failed to get asset location for", assetInfo, "no download URL returned")
 				uploadWG.Done()
 				continue
 			}

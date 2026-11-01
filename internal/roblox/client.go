@@ -28,6 +28,16 @@ func NewClient(cookie string) (*Client, error) {
 	c := &Client{
 		httpClient: &http.Client{
 			Timeout: 30 * time.Second,
+			// Uploads run dozens of requests at once against a few hosts. The default
+			// of 2 idle connections per host forces a new TLS handshake for most of them.
+			Transport: &http.Transport{
+				Proxy:               http.ProxyFromEnvironment,
+				ForceAttemptHTTP2:   true,
+				MaxIdleConns:        200,
+				MaxIdleConnsPerHost: 64,
+				IdleConnTimeout:     90 * time.Second,
+				TLSHandshakeTimeout: 10 * time.Second,
+			},
 		},
 	}
 
