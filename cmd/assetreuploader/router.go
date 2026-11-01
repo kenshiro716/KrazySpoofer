@@ -14,6 +14,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/color"
 	"github.com/kenshiro716/KrazySpoofer/internal/files"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/update"
 )
 
 var CompatiblePluginVersion = ""
@@ -82,6 +83,12 @@ func serve(c *roblox.Client) error {
 		if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 			color.Error.Println(err)
 			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+
+		if err := update.Check(); err != nil {
+			color.Error.Println(err)
+			w.WriteHeader(http.StatusConflict)
 			return
 		}
 

@@ -11,6 +11,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/console"
 	"github.com/kenshiro716/KrazySpoofer/internal/files"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/update"
 )
 
 var (
@@ -22,6 +23,13 @@ func main() {
 	console.ClearScreen()
 	console.PlayIntro()
 	console.ClearScreen()
+
+	// Checked before the cookie is touched, so an old copy does nothing at all.
+	if err := update.Check(); err != nil {
+		color.Error.Println(err)
+		console.Input("Press Enter to close.")
+		return
+	}
 
 	fmt.Println("Authenticating cookie...")
 

@@ -27,6 +27,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/games"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/publish"
+	"github.com/kenshiro716/KrazySpoofer/internal/update"
 )
 
 //go:embed app.html
@@ -187,6 +188,10 @@ func (a *appServer) scan(w http.ResponseWriter, _ *http.Request) {
 		writeError(w, "Open a place file first.")
 		return
 	}
+	if err := update.Check(); err != nil {
+		writeError(w, err.Error())
+		return
+	}
 
 	a.client.SetCancelled(false)
 	a.update(func(s *appStatus) { s.State = appScanning; s.ScanDone, s.ScanTotal, s.Error = 0, 0, "" })
@@ -242,6 +247,10 @@ func appOutputPath(fileName string) (string, error) {
 func (a *appServer) start(w http.ResponseWriter, r *http.Request) {
 	if a.busy() || a.ids == nil {
 		writeError(w, "Open a place file first.")
+		return
+	}
+	if err := update.Check(); err != nil {
+		writeError(w, err.Error())
 		return
 	}
 
