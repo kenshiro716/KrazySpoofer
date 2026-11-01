@@ -11,6 +11,7 @@ return function(ui: UiLibrary.Ui, plugin: Plugin)
     tab:CreateButton("Reupload", function()
         local filter = getFilterOptions(plugin, game:GetDescendants())
         table.insert(filter.WhitelistedInstances, "Sound")
+        filter.Attributes = true
 
 		reuploadIds(plugin, ui, filter, "Sound", _G.getPlaceList()) -- forgive me
 	end)
@@ -18,7 +19,8 @@ return function(ui: UiLibrary.Ui, plugin: Plugin)
 	tab:CreateButton("Reupload Selected", function()
         local filter = {
             WhitelistedInstances = { "Sound", "StringValue", "NumberValue", "IntValue", "LuaSourceContainer" },
-            Instances = Selection:Get()
+            Instances = Selection:Get(),
+            Attributes = true
         }
 
         reuploadIds(plugin, ui, filter, "Sound", _G.getPlaceList()) -- forgive me

@@ -57,6 +57,17 @@ local function setStringValueIds(strValue: StringValue, oldId: number, newId: nu
     strValue.Value = replaceFullNumberToken(strValue.Value, oldId, newId)
 end
 
+local function setAttributeIds(instance: Instance, oldId: number, newId: number)
+    for name, value in instance:GetAttributes() do
+        if value == oldId then
+            instance:SetAttribute(name, newId)
+        elseif type(value) == "string" then
+            local replaced = replaceFullNumberToken(value, oldId, newId)
+            if replaced ~= value then instance:SetAttribute(name, replaced) end
+        end
+    end
+end
+
 local function setCharacterMesh(characterMesh: CharacterMesh, _: number, newId: number)
     characterMesh.MeshId = newId
 end
@@ -154,13 +165,22 @@ local instanceIdSetters = {
     SpecialMesh = setSpecialMesh,
 }
 
-return function(filteredIds: { [number]: { Instance } }, idsToChange: { IdPair })
+return function(filteredIds: { [number]: { Instance } }, idsToChange: { IdPair }, attributeIds: { [number]: { Instance } }?)
     local waitGroup = WaitGroup.new()
     local scriptIdChanges = {}
 
     for _, idPair in idsToChange do
         local oldId = idPair.oldId
         local newId = idPair.newId
+
+        for _, instance in (attributeIds and attributeIds[oldId]) or {} do
+            waitGroup:Add(function()
+                task.delay(0, function()
+                    local success, result = pcall(setAttributeIds, instance, oldId, newId)
+                    if not success then warn("Failed to change attributes on", instance, `{oldId} to {newId}:`, result) end
+                end)
+            end)
+        end
 
         local instanceArray = filteredIds[oldId]
         if not instanceArray then continue end

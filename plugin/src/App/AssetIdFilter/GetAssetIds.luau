@@ -3,6 +3,7 @@
 export type FilterOptions = {
     WhitelistedInstances: { string },
     Instances: { Instance },
+    Attributes: boolean?,
 }
 
 local function isValidId(id: number): boolean
@@ -97,6 +98,17 @@ local instanceIdGetters: { [string]: (instance: any) -> { [number]: { Instance }
     SpecialMesh = getSpecialMesh,
 }
 
+local function getAttributeIds(instance: Instance): { [number]: { Instance } }
+    local idMap = {}
+    for _, value in instance:GetAttributes() do
+        local valueIds = if type(value) == "string" then getStringIds(instance, value) else getId(instance, value)
+        for id, instances in valueIds do
+            idMap[id] = instances
+        end
+    end
+    return idMap
+end
+
 local function createFilterMap(instanceFilter: { string }): {[string]: (instance: Instance) -> { [number]: { Instance } }}
     local filterMap = {} :: any -- yes my code getting lazy i apologize... v2.0.0 will do good code
     for _, className in instanceFilter do
@@ -127,15 +139,22 @@ local function merge(originalIdMap: { [number]: { Instance } }, otherIdMap: { [n
     end
 end
 
-return function(filterOptions: FilterOptions): { [number]: { Instance } }
+-- Ids found in attributes are returned separately: they can sit on any class and
+-- are swapped without touching the instance's own id property.
+return function(filterOptions: FilterOptions): ({ [number]: { Instance } }, { [number]: { Instance } })
     local idMap = {}
+    local attributeIdMap = {}
     local filterMap = createFilterMap(filterOptions.WhitelistedInstances)
     for _, instance in filterOptions.Instances do
+        if filterOptions.Attributes then
+            merge(attributeIdMap, getAttributeIds(instance))
+        end
+
         local className = instance.ClassName
         local parseId = filterMap[className]
         if not parseId then continue end
 
         merge(idMap, parseId(instance))
     end
-    return idMap
+    return idMap, attributeIdMap
 end

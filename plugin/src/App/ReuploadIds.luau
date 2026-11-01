@@ -108,8 +108,8 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         return
     end
     
-    local filteredIds = AssetIdFilter.filterInstances(filterOptions)
-    if next(filteredIds) == nil then
+    local filteredIds, attributeIds = AssetIdFilter.filterInstances(filterOptions)
+    if next(filteredIds) == nil and next(attributeIds) == nil then
         ui:Notify("Notification", "No ids found.")
         busy = false
         return
@@ -160,7 +160,7 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         end
 
         if #(result :: any) == 0 then return end
-        AssetIdFilter.replaceIds(filteredIds, result :: any)
+        AssetIdFilter.replaceIds(filteredIds, result :: any, attributeIds)
         warn(`Replaced {#(result :: any)} ids`)
     end
 
@@ -170,7 +170,7 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         busy = false
     end
 
-    local idArray = AssetIdFilter.getIdArray(filteredIds)
+    local idArray = AssetIdFilter.getIdArray(filteredIds, attributeIds)
     local request: Request = {
         pluginVersion = currentVersion,
         creatorId = creatorId,
