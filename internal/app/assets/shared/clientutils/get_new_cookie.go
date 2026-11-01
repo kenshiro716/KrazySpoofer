@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/shared/permissions"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/config"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/context"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/request"
-	"github.com/kenshiro716/Asset-Reuploader/internal/color"
-	"github.com/kenshiro716/Asset-Reuploader/internal/console"
-	"github.com/kenshiro716/Asset-Reuploader/internal/files"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/permissions"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/color"
+	"github.com/kenshiro716/KrazySpoofer/internal/console"
+	"github.com/kenshiro716/KrazySpoofer/internal/files"
 )
 
 var cookieFile = config.Get("cookie_file")

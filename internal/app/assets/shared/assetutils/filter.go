@@ -1,9 +1,9 @@
 package assetutils
 
 import (
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/context"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/request"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox/develop"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
 )
 
 func NewFilter(ctx *context.Context, r *request.Request, assetTypeID int32) func(assetsInfo develop.GetAssetsInfoResponse) []*develop.AssetInfo {

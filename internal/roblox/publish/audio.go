@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 )
 
 var UploadAudioErrors = struct {

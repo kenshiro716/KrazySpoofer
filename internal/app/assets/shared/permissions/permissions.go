@@ -3,11 +3,11 @@ package permissions
 import (
 	"errors"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/context"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/request"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox/develop"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox/groups"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/groups"
 )
 
 var (

@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/shared/clientutils"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/context"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/request"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox/assets"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/clientutils"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/assets"
 )
 
 const (

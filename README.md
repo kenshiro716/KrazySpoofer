@@ -7,6 +7,8 @@
     <a href="https://github.com/kartFr/Asset-Reuploader?tab=GPL-3.0-1-ov-file"><img src="https://img.shields.io/github/license/kartFr/Asset-Reuploader?color=yellow" alt="License" /></a>
 </div>
 
+> KrazySpoofer is a modified version of [Asset-Reuploader](https://github.com/kartFr/Asset-Reuploader) by kartFr and contributors, including [BacFr](https://github.com/bacfr/Asset-Reuploader). It is licensed under the GPL-3.0; see [LICENSE](LICENSE).
+
 #
 
 Roblox asset reuploader using a [roblox plugin](https://create.roblox.com/store/asset/89096096219225/Asset-Reuploader) and go.

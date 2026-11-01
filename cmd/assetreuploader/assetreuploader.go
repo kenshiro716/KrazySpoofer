@@ -6,11 +6,11 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/config"
-	"github.com/kenshiro716/Asset-Reuploader/internal/color"
-	"github.com/kenshiro716/Asset-Reuploader/internal/console"
-	"github.com/kenshiro716/Asset-Reuploader/internal/files"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
+	"github.com/kenshiro716/KrazySpoofer/internal/color"
+	"github.com/kenshiro716/KrazySpoofer/internal/console"
+	"github.com/kenshiro716/KrazySpoofer/internal/files"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 )
 
 var (

@@ -8,7 +8,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/files"
+	"github.com/kenshiro716/KrazySpoofer/internal/files"
 )
 
 var (

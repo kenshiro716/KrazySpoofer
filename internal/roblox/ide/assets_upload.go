@@ -12,8 +12,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/config"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 )
 
 const (

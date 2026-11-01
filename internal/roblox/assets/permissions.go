@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 )
 
 var permissionsURL = "https://apis.roblox.com/asset-permissions-api/v1/assets/%d/permissions"

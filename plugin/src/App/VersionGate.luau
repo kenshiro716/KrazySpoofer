@@ -7,7 +7,7 @@ local HttpService = game:GetService("HttpService")
 -- To force an update: raise this, release the plugin, then raise "build" in
 -- latest-plugin.json to the same number.
 local BUILD = 1
-local LATEST_URL = "https://raw.githubusercontent.com/kenshiro716/Asset-Reuploader/main/latest-plugin.json"
+local LATEST_URL = "https://raw.githubusercontent.com/kenshiro716/KrazySpoofer/main/latest-plugin.json"
 
 function VersionGate.isOutdated(body: string): (boolean?, string)
     local decoded, latest = pcall(HttpService.JSONDecode, HttpService, body)

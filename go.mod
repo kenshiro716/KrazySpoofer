@@ -1,4 +1,4 @@
-module github.com/kenshiro716/Asset-Reuploader
+module github.com/kenshiro716/KrazySpoofer
 
 go 1.23.3
 

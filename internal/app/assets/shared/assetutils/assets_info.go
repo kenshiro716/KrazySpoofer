@@ -4,12 +4,12 @@ import (
 	"net"
 	"time"
 
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/shared/clientutils"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/context"
-	"github.com/kenshiro716/Asset-Reuploader/internal/app/request"
-	"github.com/kenshiro716/Asset-Reuploader/internal/retry"
-	"github.com/kenshiro716/Asset-Reuploader/internal/roblox/develop"
-	"github.com/kenshiro716/Asset-Reuploader/internal/taskqueue"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/clientutils"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/retry"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
+	"github.com/kenshiro716/KrazySpoofer/internal/taskqueue"
 )
 
 const AssetsInfoChunkSize int = 50
