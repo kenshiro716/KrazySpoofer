@@ -13,6 +13,7 @@ type ProductInfo struct {
 	Description      string `json:"description"`
 	Price            int64  `json:"price"`
 	IconImageAssetID int64  `json:"iconImageAssetId"`
+	Creator          string `json:"creator"`
 }
 
 type RawRequest struct {
@@ -25,7 +26,8 @@ type RawRequest struct {
 	ExportJSON      bool    `json:"exportJSON"`
 	IsGroup         bool    `json:"isGroup"`
 
-	Products []ProductInfo `json:"products"`
+	Products   []ProductInfo `json:"products"`
+	GamePasses []ProductInfo `json:"gamePasses"`
 
 	ShareUserID  int64 `json:"shareUserId"`
 	ShareGroupID int64 `json:"shareGroupId"`
@@ -39,6 +41,7 @@ type Request struct {
 	DefaultPlaceIDs []int64
 	IsGroup         bool
 	Products        []ProductInfo
+	GamePasses      []ProductInfo
 	ShareUserID     int64
 	ShareGroupID    int64
 }
@@ -59,6 +62,7 @@ func FromRawRequest(c *roblox.Client, req *RawRequest) (*Request, error) {
 		DefaultPlaceIDs: req.DefaultPlaceIDs,
 		IsGroup:         req.IsGroup,
 		Products:        req.Products,
+		GamePasses:      req.GamePasses,
 		ShareUserID:     req.ShareUserID,
 		ShareGroupID:    req.ShareGroupID,
 	}, nil

@@ -10,8 +10,10 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/developerproducts"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/gamepasses"
 )
 
 const (
@@ -40,7 +42,7 @@ func withRetry[T any](ctx *context.Context, r *request.Request, f func() (T, err
 			time.Sleep(min(rle.RetryAfter, maxWait))
 		case errors.Is(err, developerproducts.ErrNotLoggedIn):
 			clientutils.GetNewCookie(ctx, r, "cookie expired")
-		case errors.Is(err, developerproducts.ErrNameConflict):
+		case errors.Is(err, developerproducts.ErrNameConflict), errors.Is(err, roblox.ErrCancelled):
 			return zero, err
 		default:
 			time.Sleep(time.Duration(try) * time.Second)
@@ -49,14 +51,29 @@ func withRetry[T any](ctx *context.Context, r *request.Request, f func() (T, err
 	return zero, lastErr
 }
 
+// service is what differs between developer products and game passes.
+type service struct {
+	label  string
+	list   func(c *roblox.Client, universeID int64) ([]developerproducts.Product, error)
+	create func(c *roblox.Client, universeID int64, name, description string, price int64, icon []byte) (developerproducts.Product, error)
+}
+
 func Reupload(ctx *context.Context, r *request.Request) {
+	run(ctx, r, r.Products, service{"developer products", developerproducts.List, developerproducts.Create})
+}
+
+func ReuploadGamePasses(ctx *context.Context, r *request.Request) {
+	run(ctx, r, r.GamePasses, service{"game passes", gamepasses.List, gamepasses.Create})
+}
+
+func run(ctx *context.Context, r *request.Request, items []request.ProductInfo, s service) {
 	client := ctx.Client
 	logger := ctx.Logger
 	resp := ctx.Response
 
-	products := make([]request.ProductInfo, 0, len(r.Products))
-	seen := make(map[int64]struct{}, len(r.Products))
-	for _, p := range r.Products {
+	products := make([]request.ProductInfo, 0, len(items))
+	seen := make(map[int64]struct{}, len(items))
+	for _, p := range items {
 		if _, dup := seen[p.ID]; dup || p.ID == 0 {
 			continue
 		}
@@ -65,13 +82,13 @@ func Reupload(ctx *context.Context, r *request.Request) {
 	}
 	total := len(products)
 
-	logger.Println("Reuploading developer products...")
+	logger.Println("Reuploading " + s.label + "...")
 
 	existing, err := withRetry(ctx, r, func() ([]developerproducts.Product, error) {
-		return developerproducts.List(client, r.UniverseID)
+		return s.list(client, r.UniverseID)
 	})
 	if err != nil {
-		logger.Warn("Could not list this game's developer products, duplicates may be created: ", err)
+		logger.Warn("Could not list this game's "+s.label+", duplicates may be created: ", err)
 		existing = nil
 	}
 
@@ -116,7 +133,7 @@ func Reupload(ctx *context.Context, r *request.Request) {
 		var created developerproducts.Product
 		for attempt := 1; ; attempt++ {
 			created, err = withRetry(ctx, r, func() (developerproducts.Product, error) {
-				return developerproducts.Create(client, r.UniverseID, name, p.Description, price, icon)
+				return s.create(client, r.UniverseID, name, p.Description, price, icon)
 			})
 			if !errors.Is(err, developerproducts.ErrNameConflict) || attempt >= maxNameTries {
 				break

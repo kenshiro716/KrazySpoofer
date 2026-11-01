@@ -24,6 +24,7 @@ var assetModules = map[string]func(ctx *context.Context, r *request.Request){
 	"Sound":     sound.Reupload,
 
 	"DeveloperProduct": developerproduct.Reupload,
+	"GamePass":         developerproduct.ReuploadGamePasses,
 }
 
 func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.RawRequest, resp *response.Response) (func() error, error) {
@@ -53,9 +54,9 @@ func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.R
 
 		reupload(ctx, req)
 
-		// Developer products are not assets, so they have no permissions to share.
+		// Products and passes are not assets, so they have no permissions to share.
 		newIDs := resp.TakeNewIDs()
-		if assetType != "DeveloperProduct" {
+		if assetType != "DeveloperProduct" && assetType != "GamePass" {
 			assetutils.ShareAssets(ctx, req, newIDs)
 		}
 		return nil

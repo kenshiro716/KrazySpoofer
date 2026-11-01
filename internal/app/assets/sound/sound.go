@@ -77,6 +77,9 @@ func Reupload(ctx *context.Context, r *request.Request) {
 	}
 	currentPlaceID := r.PlaceID
 
+	// Once Roblox refuses for quota, the rest stop instead of asking for a new account.
+	var quotaReached atomic.Bool
+
 	filter := assetutils.NewFilter(ctx, r, assetTypeID)
 
 	creatorPlaceMap := shardedmap.New[*atomicarray.AtomicArray[int64]]()
@@ -142,6 +145,11 @@ func Reupload(ctx *context.Context, r *request.Request) {
 	uploadAsset := func(wg *sync.WaitGroup, assetInfo *develop.AssetInfo, location string) {
 		defer wg.Done()
 
+		if quotaReached.Load() {
+			newUploadError("Skipped", assetInfo, "monthly audio limit reached")
+			return
+		}
+
 		oldName := assetInfo.Name
 
 		assetData, err := clientutils.GetRequest(client, location)
@@ -174,7 +182,10 @@ func Reupload(ctx *context.Context, r *request.Request) {
 					case publish.UploadAudioErrors.ErrNotAuthenticated:
 						clientutils.GetNewCookie(ctx, r, "cookie expired")
 					case publish.UploadAudioErrors.ErrQuotaExceeded:
-						clientutils.GetNewCookie(ctx, r, "audio limit exceeded")
+						if quotaReached.CompareAndSwap(false, true) {
+							logger.Warn("Monthly audio limit reached. Remaining sounds were skipped, run this again after the limit resets.")
+						}
+						return 0, &retry.ExitRetry{Err: err}
 					case publish.UploadAudioErrors.ErrModerated:
 						assetInfo.Name = fmt.Sprintf("(%s) [Censored]", assetInfo.Name)
 					default:

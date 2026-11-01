@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>KrazySpoofer</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<style>
+:root {
+  --bg: #140c20; --panel: #211534; --line: #4a326e; --field: #2f1f49;
+  --accent: #8a50f0; --accent-hover: #9d6af5; --text: #eee6fc; --dim: #a896c8;
+  --good: #5fe0a0; --warn: #f4c95d; --bad: #ff7b8a; --info: #7db4ff;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
+main { max-width: 860px; margin: 0 auto; padding: 20px 16px 32px; display: grid; gap: 14px; }
+h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
+h2 { margin: 0 0 10px; font-size: 13px; color: var(--dim); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
+header p { margin: 2px 0 0; color: var(--dim); }
+section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
+.drop { display: block; border: 1px dashed var(--line); border-radius: 8px; padding: 22px; text-align: center; color: var(--dim); cursor: pointer; }
+.drop.over, .drop:hover { border-color: var(--accent); color: var(--text); }
+.drop input { display: none; }
+.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
+label.field { display: grid; gap: 4px; color: var(--dim); font-size: 13px; }
+input[type=text] { width: 100%; background: var(--field); border: 1px solid var(--line); border-radius: 6px; color: var(--text); padding: 8px 10px; font: inherit; }
+input[type=text]:focus { outline: 1px solid var(--accent); }
+.checks { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
+.checks label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
+input[type=checkbox] { accent-color: var(--accent); }
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+button { background: var(--field); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; font: inherit; cursor: pointer; }
+button:hover:not(:disabled) { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
+button.primary:hover:not(:disabled) { background: var(--accent-hover); }
+button:disabled { opacity: .45; cursor: default; }
+.bar { height: 8px; background: var(--field); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+.bar div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
+#summary { margin-top: 8px; color: var(--dim); min-height: 20px; }
+#message { color: var(--bad); min-height: 20px; }
+#message.ok { color: var(--good); }
+.items { display: grid; gap: 4px; max-height: 220px; overflow: auto; }
+.items label { display: flex; gap: 8px; padding: 4px 6px; border-radius: 4px; cursor: pointer; overflow-wrap: anywhere; }
+.items label:hover { background: var(--field); }
+.items small { color: var(--dim); }
+#log { margin: 0; height: 260px; overflow: auto; background: #0e0818; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font: 12px/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+.c31 { color: var(--bad); } .c32 { color: var(--good); } .c33 { color: var(--warn); } .c34 { color: var(--info); }
+[hidden] { display: none !important; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <h1>KrazySpoofer</h1>
+    <p>Reupload a place file's assets and save a new copy. Your original file is never changed.</p>
+  </header>
+
+  <section>
+    <h2>Place file</h2>
+    <label class="drop" id="drop">
+      <input type="file" id="file" accept=".rbxl,.rbxlx">
+      <span id="dropText">Drop a .rbxl or .rbxlx here, or click to choose one</span>
+    </label>
+    <div id="summary"></div>
+  </section>
+
+  <section>
+    <h2>Settings</h2>
+    <div class="grid">
+      <label class="field">Place id to reupload for
+        <input type="text" id="placeId" inputmode="numeric" autocomplete="off">
+      </label>
+      <label class="field">Share with user id (friends only)
+        <input type="text" id="shareUser" inputmode="numeric" autocomplete="off">
+      </label>
+      <label class="field">Share with group id
+        <input type="text" id="shareGroup" inputmode="numeric" autocomplete="off">
+      </label>
+    </div>
+    <div class="checks">
+      <label><input type="checkbox" value="Animation" class="type" checked> Animations</label>
+      <label><input type="checkbox" value="Sound" class="type" checked> Sounds</label>
+      <label><input type="checkbox" value="Mesh" class="type" checked> Meshes</label>
+    </div>
+  </section>
+
+  <section id="productsPanel" hidden>
+    <h2>Game passes and developer products</h2>
+    <p id="productsHint">Numbers in a game can match a product by chance. Only tick the ones that belong to this game.</p>
+    <div class="items" id="items"></div>
+  </section>
+
+  <section>
+    <div class="actions">
+      <button id="scan" disabled>Find game passes and products</button>
+      <button id="start" class="primary" disabled>Start reupload</button>
+      <button id="cancel" disabled>Cancel</button>
+      <button id="show" hidden>Show saved file</button>
+    </div>
+    <div class="bar"><div id="progress"></div></div>
+    <div id="message"></div>
+  </section>
+
+  <section>
+    <h2>Log</h2>
+    <pre id="log"></pre>
+  </section>
+</main>
+<script>
+const token = "__TOKEN__";
+const $ = id => document.getElementById(id);
+const headers = { "X-KrazySpoofer-Token": token };
+let lineCount = 0, shownItems = "", lastState = "";
+
+function say(text, ok) {
+  $("message").textContent = text || "";
+  $("message").className = ok ? "ok" : "";
+}
+
+async function post(path, options) {
+  const response = await fetch("/app/api/" + path, { method: "POST", ...options, headers: { ...headers, ...(options && options.headers) } });
+  if (!response.ok) say(await response.text());
+  return response.ok;
+}
+
+async function openFile(file) {
+  if (!file) return;
+  say("");
+  $("dropText").textContent = "Reading " + file.name + "...";
+  const ok = await post("open", { body: file, headers: { "X-File-Name": encodeURIComponent(file.name) } });
+  if (!ok) $("dropText").textContent = "Drop a .rbxl or .rbxlx here, or click to choose one";
+  refresh();
+}
+
+$("file").addEventListener("change", e => openFile(e.target.files[0]));
+for (const name of ["dragover", "dragenter"]) $("drop").addEventListener(name, e => { e.preventDefault(); $("drop").classList.add("over"); });
+for (const name of ["dragleave", "drop"]) $("drop").addEventListener(name, e => { e.preventDefault(); $("drop").classList.remove("over"); });
+$("drop").addEventListener("drop", e => openFile(e.dataTransfer.files[0]));
+
+for (const id of ["placeId", "shareUser", "shareGroup"]) {
+  $(id).addEventListener("input", () => { $(id).value = $(id).value.replace(/\D/g, ""); });
+}
+
+$("scan").addEventListener("click", () => { say(""); post("scan"); });
+$("cancel").addEventListener("click", () => post("cancel"));
+$("show").addEventListener("click", () => post("show"));
+$("start").addEventListener("click", () => {
+  say("");
+  if (!$("placeId").value) return say("Enter the place id.");
+  const picked = kind => [...document.querySelectorAll("input[data-kind=" + kind + "]:checked")].map(i => Number(i.value));
+  post("start", { body: JSON.stringify({
+    placeId: Number($("placeId").value),
+    shareUserId: Number($("shareUser").value),
+    shareGroupId: Number($("shareGroup").value),
+    assetTypes: [...document.querySelectorAll(".type:checked")].map(i => i.value),
+    gamePasses: picked("pass"),
+    products: picked("product"),
+  }) });
+});
+
+function addLine(line) {
+  const span = document.createElement("div");
+  const color = line.match(/\x1b\[(3[1-4])m/);
+  if (color) span.className = "c" + color[1];
+  span.textContent = line.replace(/\x1b\[[0-9;]*m/g, "");
+  $("log").append(span);
+  const progress = span.textContent.match(/\[(\d+)(?:-\d+)?\/(\d+)\]/);
+  if (progress) $("progress").style.width = Math.min(100, 100 * progress[1] / progress[2]) + "%";
+}
+
+function showItems(status) {
+  const passes = status.gamePasses || [], products = status.products || [];
+  const key = JSON.stringify([passes.map(p => p.id), products.map(p => p.id)]);
+  if (key === shownItems) return;
+  shownItems = key;
+
+  $("items").textContent = "";
+  $("productsPanel").hidden = status.state !== "scanned" && !passes.length && !products.length;
+  $("productsHint").textContent = passes.length || products.length
+    ? "Numbers in a game can match a product by chance. Only tick the ones that belong to this game."
+    : "None found.";
+
+  const add = (item, kind, label) => {
+    const row = document.createElement("label");
+    const box = document.createElement("input");
+    box.type = "checkbox";
+    box.value = item.id;
+    box.dataset.kind = kind;
+    const text = document.createElement("span");
+    text.textContent = item.name + " ";
+    const details = document.createElement("small");
+    details.textContent = label + " · " + item.id + " · " + item.price + " Robux · by " + (item.creator || "unknown");
+    text.append(details);
+    row.append(box, text);
+    $("items").append(row);
+  };
+  passes.forEach(p => add(p, "pass", "Game pass"));
+  products.forEach(p => add(p, "product", "Developer product"));
+}
+
+function render(status) {
+  const state = status.state, running = state === "running" || state === "scanning";
+  const hasFile = state !== "idle";
+
+  if (hasFile) {
+    $("dropText").textContent = status.fileName || "Place file";
+    let text = status.idCount + " possible ids found.";
+    if (status.quota) text += " Audio uploads used: " + status.quota.usage + "/" + status.quota.capacity + ".";
+    if (status.unreadable) text += " " + status.unreadable + " attribute sets could not be read and will not change.";
+    $("summary").textContent = text;
+  }
+
+  $("scan").disabled = !hasFile || running;
+  $("start").disabled = !hasFile || running;
+  $("cancel").disabled = !running;
+  $("show").hidden = !status.output;
+
+  if (state === "scanning") {
+    say(status.scanTotal ? "Checking " + status.scanDone + "/" + status.scanTotal + " numbers..." : "Checking which ids are assets...", true);
+    if (status.scanTotal) $("progress").style.width = 100 * status.scanDone / status.scanTotal + "%";
+  } else if (state === "running") {
+    say("Reuploading...", true);
+  } else if (lastState && lastState !== state) {
+    if (status.error) say(status.error);
+    else if (status.output) say("Done. Saved to " + status.output, true);
+    else if (state === "finished") say("Finished. Nothing was reuploaded, so no new file was saved.");
+    else say("");
+    if (status.output) $("progress").style.width = "100%";
+  }
+  lastState = state;
+
+  showItems(status);
+}
+
+async function refresh() {
+  try {
+    const response = await fetch("/app/api/status?after=" + lineCount, { headers });
+    if (!response.ok) return;
+    const status = await response.json();
+
+    if (status.lineCount < lineCount) {
+      lineCount = 0;
+      $("log").textContent = "";
+      return refresh();
+    }
+    const atBottom = $("log").scrollHeight - $("log").scrollTop - $("log").clientHeight < 30;
+    (status.lines || []).forEach(addLine);
+    lineCount = status.lineCount;
+    if (atBottom) $("log").scrollTop = $("log").scrollHeight;
+    render(status);
+  } catch {
+    say("Lost connection to the exe. Is it still running?");
+  }
+}
+
+refresh();
+setInterval(refresh, 700);
+</script>
+</body>
+</html>

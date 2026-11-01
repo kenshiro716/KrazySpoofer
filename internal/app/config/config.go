@@ -19,6 +19,7 @@ var (
 		"cookie_file":  "cookie.txt",
 		"api_key":      "",
 		"api_key_file": "api-key.txt",
+		"open_app":     "true",
 	}
 )
 

@@ -56,7 +56,7 @@ func main() {
 	if err := saveCookieFile(c.Cookie); err != nil {
 		color.Error.Println("Failed to save cookie: ", err)
 	}
-	
+
 	ensureAPIKey()
 
 	if path := placeFileArgument(); path != "" {

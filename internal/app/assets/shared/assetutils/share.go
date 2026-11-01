@@ -91,6 +91,9 @@ func shareWithTarget(ctx *context.Context, r *request.Request, assetIDs []int64,
 
 	shared := 0
 	for i, assetID := range assetIDs {
+		if ctx.Client.Cancelled() {
+			return
+		}
 		if i > 0 {
 			time.Sleep(shareInterval)
 		}

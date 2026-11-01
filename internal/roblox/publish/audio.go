@@ -42,6 +42,42 @@ type publishAudioResponse struct {
 	} `json:"errors,omitempty"`
 }
 
+// AudioQuota is how many audio uploads the account has used and may use.
+type AudioQuota struct {
+	Usage    int64 `json:"usage"`
+	Capacity int64 `json:"capacity"`
+}
+
+// GetAudioQuota returns the account's upload quota for this period.
+func GetAudioQuota(c *roblox.Client) (AudioQuota, error) {
+	req, err := http.NewRequest("GET", "https://publish.roblox.com/v1/asset-quotas?resourceType=1&assetType=Audio", http.NoBody)
+	if err != nil {
+		return AudioQuota{}, err
+	}
+	req.AddCookie(&http.Cookie{Name: ".ROBLOSECURITY", Value: c.Cookie})
+
+	resp, err := c.DoRequest(req)
+	if err != nil {
+		return AudioQuota{}, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return AudioQuota{}, errors.New(resp.Status)
+	}
+
+	var body struct {
+		Quotas []AudioQuota `json:"quotas"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return AudioQuota{}, err
+	}
+	if len(body.Quotas) == 0 {
+		return AudioQuota{}, errors.New("no quota returned")
+	}
+	return body.Quotas[0], nil
+}
+
 func xorBytes(data []byte, key byte) []byte {
 	out := make([]byte, len(data))
 	for i := range data {

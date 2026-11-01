@@ -1,4 +1,4 @@
-// Package placefile finds and replaces asset ids in .rbxlx place files.
+// Package placefile finds and replaces asset ids in .rbxl and .rbxlx place files.
 package placefile
 
 import (
@@ -102,6 +102,7 @@ const (
 
 var attributeSizes = map[byte]int{
 	0x03: 1,  // bool
+	0x04: 4,  // int
 	0x05: 4,  // float
 	0x06: 8,  // double
 	0x09: 8,  // UDim
@@ -120,6 +121,12 @@ var attributeKeypointSizes = map[byte]int{
 	0x19: 20, // ColorSequence
 }
 
+const (
+	attributeCFrame = 0x14
+	attributeEnum   = 0x15
+	attributeFont   = 0x21
+)
+
 func readLength(b []byte) (int, []byte, bool) {
 	if len(b) < 4 {
 		return 0, nil, false
@@ -129,6 +136,55 @@ func readLength(b []byte) (int, []byte, bool) {
 		return 0, nil, false
 	}
 	return int(length), b[4:], true
+}
+
+// attributeValueSize returns how many bytes a value takes up.
+func attributeValueSize(valueType byte, b []byte) (int, bool) {
+	if size, known := attributeSizes[valueType]; known {
+		return size, true
+	}
+
+	switch valueType {
+	case attributeString:
+		length, _, ok := readLength(b)
+		return 4 + length, ok
+	case attributeCFrame:
+		// Position, a rotation id, then a full matrix only when the id is 0.
+		if len(b) < 13 {
+			return 0, false
+		}
+		if b[12] == 0 {
+			return 49, true
+		}
+		return 13, true
+	case attributeEnum:
+		length, rest, ok := readLength(b)
+		if !ok || len(rest)-length < 4 {
+			return 0, false
+		}
+		return 4 + length + 4, true
+	case attributeFont:
+		// Weight, style, then the family and cached face strings.
+		if len(b) < 3 {
+			return 0, false
+		}
+		family, rest, ok := readLength(b[3:])
+		if !ok {
+			return 0, false
+		}
+		face, _, ok := readLength(rest[family:])
+		return 3 + 4 + family + 4 + face, ok
+	}
+
+	keypointSize, isSequence := attributeKeypointSizes[valueType]
+	if !isSequence || len(b) < 4 {
+		return 0, false
+	}
+	keypoints := binary.LittleEndian.Uint32(b)
+	if uint64(keypoints)*uint64(keypointSize) > uint64(len(b)-4) {
+		return 0, false
+	}
+	return 4 + int(keypoints)*keypointSize, true
 }
 
 // parseAttributes returns false for anything it cannot fully read, such as an
@@ -150,26 +206,8 @@ func parseAttributes(b []byte) ([]attribute, bool) {
 		valueType := rest[keyLength]
 		rest = rest[keyLength+1:]
 
-		size, known := attributeSizes[valueType]
-		switch {
-		case valueType == attributeString:
-			length, _, ok := readLength(rest)
-			if !ok {
-				return nil, false
-			}
-			size = 4 + length
-		case !known:
-			keypointSize, isSequence := attributeKeypointSizes[valueType]
-			if !isSequence || len(rest) < 4 {
-				return nil, false
-			}
-			keypoints := binary.LittleEndian.Uint32(rest)
-			if uint64(keypoints)*uint64(keypointSize) > uint64(len(rest)-4) {
-				return nil, false
-			}
-			size = 4 + int(keypoints)*keypointSize
-		}
-		if size > len(rest) {
+		size, ok := attributeValueSize(valueType, rest)
+		if !ok || size > len(rest) {
 			return nil, false
 		}
 
@@ -198,21 +236,12 @@ func doubleID(value []byte) (int64, bool) {
 	return int64(number), true
 }
 
-// replaceAttributes returns the rebuilt base64 blob, or the original when
-// nothing changed. readable is false when the blob could not be parsed.
-func replaceAttributes(encoded []byte, ids map[int64]int64, found func(int64)) (result []byte, replaced int, readable bool) {
-	compact := bytes.Join(bytes.Fields(encoded), nil)
-	if len(compact) == 0 {
-		return encoded, 0, true
-	}
-
-	blob, err := base64.StdEncoding.AppendDecode(nil, compact)
-	if err != nil {
-		return encoded, 0, false
-	}
+// replaceAttributeBlob returns the rebuilt blob, or the original when nothing
+// changed. readable is false when the blob could not be parsed.
+func replaceAttributeBlob(blob []byte, ids map[int64]int64, found func(int64)) (result []byte, replaced int, readable bool) {
 	attributes, ok := parseAttributes(blob)
 	if !ok {
-		return encoded, 0, false
+		return blob, 0, false
 	}
 
 	for i, a := range attributes {
@@ -238,9 +267,28 @@ func replaceAttributes(encoded []byte, ids map[int64]int64, found func(int64)) (
 		}
 	}
 	if replaced == 0 {
+		return blob, 0, true
+	}
+	return encodeAttributes(attributes), replaced, true
+}
+
+// replaceAttributes is replaceAttributeBlob for the base64 text in .rbxlx files.
+func replaceAttributes(encoded []byte, ids map[int64]int64, found func(int64)) (result []byte, replaced int, readable bool) {
+	compact := bytes.Join(bytes.Fields(encoded), nil)
+	if len(compact) == 0 {
 		return encoded, 0, true
 	}
-	return base64.StdEncoding.AppendEncode(nil, encodeAttributes(attributes)), replaced, true
+
+	blob, err := base64.StdEncoding.AppendDecode(nil, compact)
+	if err != nil {
+		return encoded, 0, false
+	}
+
+	rebuilt, replaced, readable := replaceAttributeBlob(blob, ids, found)
+	if replaced == 0 {
+		return encoded, 0, readable
+	}
+	return base64.StdEncoding.AppendEncode(nil, rebuilt), replaced, readable
 }
 
 // Result describes one pass over a place file.
@@ -250,7 +298,14 @@ type Result struct {
 	UnreadableAttribs int
 }
 
-func process(data []byte, ids map[int64]int64, found func(int64)) Result {
+func process(data []byte, ids map[int64]int64, found func(int64)) (Result, error) {
+	if IsBinary(data) {
+		return processBinary(data, ids, found)
+	}
+	return processXML(data, ids, found), nil
+}
+
+func processXML(data []byte, ids map[int64]int64, found func(int64)) Result {
 	var out bytes.Buffer
 	result := Result{}
 	last := 0
@@ -308,21 +363,24 @@ func process(data []byte, ids map[int64]int64, found func(int64)) Result {
 }
 
 // Candidates returns every number in the file that could be an asset id.
-func Candidates(data []byte) (ids []int64, unreadableAttributes int) {
+func Candidates(data []byte) (ids []int64, unreadableAttributes int, err error) {
 	seen := make(map[int64]struct{})
-	result := process(data, nil, func(id int64) {
+	result, err := process(data, nil, func(id int64) {
 		seen[id] = struct{}{}
 	})
+	if err != nil {
+		return nil, 0, err
+	}
 
 	ids = make([]int64, 0, len(seen))
 	for id := range seen {
 		ids = append(ids, id)
 	}
 	slices.Sort(ids)
-	return ids, result.UnreadableAttribs
+	return ids, result.UnreadableAttribs, nil
 }
 
 // Replace swaps every old id in ids for its new id.
-func Replace(data []byte, ids map[int64]int64) Result {
+func Replace(data []byte, ids map[int64]int64) (Result, error) {
 	return process(data, ids, nil)
 }

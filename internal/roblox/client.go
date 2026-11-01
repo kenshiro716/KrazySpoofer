@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"sync/atomic"
 	"time"
 )
 
@@ -12,6 +13,7 @@ const cookieWarning = "WARNING:-DO-NOT-SHARE-THIS.--Sharing-this-will-allow-some
 
 var (
 	ErrNoWarning = errors.New("include the .ROBLOSECURITY warning")
+	ErrCancelled = errors.New("cancelled")
 )
 
 type Client struct {
@@ -22,6 +24,8 @@ type Client struct {
 
 	token      string
 	tokenMutex sync.RWMutex
+
+	cancelled atomic.Bool
 }
 
 func NewClient(cookie string) (*Client, error) {
@@ -77,6 +81,18 @@ func (c *Client) SetToken(s string) {
 	c.tokenMutex.Unlock()
 }
 
+// SetCancelled makes every request fail straight away, which ends a run quickly.
+func (c *Client) SetCancelled(cancelled bool) {
+	c.cancelled.Store(cancelled)
+}
+
+func (c *Client) Cancelled() bool {
+	return c.cancelled.Load()
+}
+
 func (c *Client) DoRequest(req *http.Request) (*http.Response, error) {
+	if c.Cancelled() {
+		return nil, ErrCancelled
+	}
 	return c.httpClient.Do(req)
 }

@@ -39,6 +39,16 @@ The [discord](https://discord.gg/XTEtUqPTat) does have a dedicated suggestions c
 
 If you do need help with anything from stupid questions(pls no) to setting up a fork feel free to DM me on discord, my tag is alekfart.
 
+## KrazySpoofer app
+
+Starting the executable opens the KrazySpoofer window. Set `open_app=false` in `config.ini` to turn that off.
+
+- Open a `.rbxl` or `.rbxlx` place file. Its animations, sounds and meshes are reuploaded and a new copy is saved in the `Reuploaded` folder. The original is never changed.
+- Game passes and developer products can be found and ticked before starting.
+- Reuploads can be shared with a user or a group.
+
+A place file can also be dropped on the executable to run from the console.
+
 ## License
 
 Copyright (c) 2024, kartFr

@@ -32,12 +32,12 @@ func TestCandidatesAndReplace(t *testing.T) {
 <SharedStrings><SharedString md5="x">4444444</SharedString></SharedStrings>
 </roblox>`
 
-	ids, unreadable := Candidates([]byte(file))
+	ids, unreadable, _ := Candidates([]byte(file))
 	if unreadable != 0 || !slices.Equal(ids, []int64{1234567, 7654321, 12345678}) {
 		t.Fatalf("ids %v unreadable %d", ids, unreadable)
 	}
 
-	result := Replace([]byte(file), map[int64]int64{1234567: 99999999999, 7654321: 8888888})
+	result, _ := Replace([]byte(file), map[int64]int64{1234567: 99999999999, 7654321: 8888888})
 	output := string(result.Data)
 	if result.Replaced != 2 {
 		t.Fatalf("replaced %d", result.Replaced)
@@ -61,12 +61,12 @@ func TestAttributes(t *testing.T) {
 	)
 	file := `<BinaryString name="AttributesSerialize">` + blob + `</BinaryString>`
 
-	ids, unreadable := Candidates([]byte(file))
+	ids, unreadable, _ := Candidates([]byte(file))
 	if unreadable != 0 || !slices.Equal(ids, []int64{1234567, 7654321}) {
 		t.Fatalf("ids %v unreadable %d", ids, unreadable)
 	}
 
-	result := Replace([]byte(file), map[int64]int64{1234567: 99999999999, 7654321: 8888888})
+	result, _ := Replace([]byte(file), map[int64]int64{1234567: 99999999999, 7654321: 8888888})
 	if result.Replaced != 2 {
 		t.Fatalf("replaced %d", result.Replaced)
 	}
@@ -92,10 +92,10 @@ func TestUnknownAttributeIsLeftAlone(t *testing.T) {
 	blob := attributeBlob(stringAttribute("Hit", "1234567"), attribute{[]byte("Odd"), 0x7F, []byte{1, 2, 3}})
 	file := `<BinaryString name="AttributesSerialize">` + blob + `</BinaryString>`
 
-	if _, unreadable := Candidates([]byte(file)); unreadable != 1 {
+	if _, unreadable, _ := Candidates([]byte(file)); unreadable != 1 {
 		t.Fatalf("unreadable %d", unreadable)
 	}
-	if result := Replace([]byte(file), map[int64]int64{1234567: 7654321}); string(result.Data) != file {
+	if result, _ := Replace([]byte(file), map[int64]int64{1234567: 7654321}); string(result.Data) != file {
 		t.Fatal("blob changed")
 	}
 }
@@ -106,7 +106,7 @@ func TestTruncatedAttributesAreLeftAlone(t *testing.T) {
 		t.Fatal("parsed truncated blob")
 	}
 	file := `<BinaryString name="AttributesSerialize">` + blob + `</BinaryString>`
-	if result := Replace([]byte(file), map[int64]int64{1: 2}); string(result.Data) != file {
+	if result, _ := Replace([]byte(file), map[int64]int64{1: 2}); string(result.Data) != file {
 		t.Fatal("blob changed")
 	}
 }

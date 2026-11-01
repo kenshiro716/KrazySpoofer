@@ -34,10 +34,10 @@ func (e *RateLimitError) Error() string { return "rate limited" }
 
 func (e *RateLimitError) Unwrap() error { return ErrRateLimited }
 
-// flexInt accepts both JSON numbers and numeric strings; the API docs show both.
-type flexInt int64
+// FlexInt accepts both JSON numbers and numeric strings; the API docs show both.
+type FlexInt int64
 
-func (f *flexInt) UnmarshalJSON(b []byte) error {
+func (f *FlexInt) UnmarshalJSON(b []byte) error {
 	s := strings.Trim(string(b), `"`)
 	if s == "" || s == "null" {
 		*f = 0
@@ -47,7 +47,7 @@ func (f *flexInt) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*f = flexInt(v)
+	*f = FlexInt(v)
 	return nil
 }
 
@@ -59,10 +59,10 @@ type Product struct {
 }
 
 type productJSON struct {
-	ProductID        flexInt `json:"productId"`
+	ProductID        FlexInt `json:"productId"`
 	Name             string  `json:"name"`
 	Description      string  `json:"description"`
-	IconImageAssetID flexInt `json:"iconImageAssetId"`
+	IconImageAssetID FlexInt `json:"iconImageAssetId"`
 }
 
 func (p productJSON) toProduct() Product {
@@ -79,10 +79,10 @@ type listResponse struct {
 	NextPageToken     string        `json:"nextPageToken"`
 }
 
-// do sends an authenticated request built by newReq. It refreshes the XSRF
+// Do sends an authenticated request built by newReq. It refreshes the XSRF
 // token once, and if an API key without developer-product scopes is
 // rejected, retries once with the cookie alone.
-func do(c *roblox.Client, newReq func() (*http.Request, error)) (int, []byte, error) {
+func Do(c *roblox.Client, newReq func() (*http.Request, error)) (int, []byte, error) {
 	apiKey := strings.TrimSpace(config.Get("api_key"))
 	useAPIKey := apiKey != ""
 	refreshedToken := false
@@ -171,7 +171,7 @@ func List(c *roblox.Client, universeID int64) ([]Product, error) {
 		}
 		u := fmt.Sprintf("%s%d/developer-products/creator?%s", baseURL, universeID, q.Encode())
 
-		_, body, err := do(c, func() (*http.Request, error) {
+		_, body, err := Do(c, func() (*http.Request, error) {
 			return http.NewRequest("GET", u, http.NoBody)
 		})
 		if err != nil {
@@ -193,12 +193,21 @@ func List(c *roblox.Client, universeID int64) ([]Product, error) {
 	}
 }
 
+// ClassifyCreateError turns a name clash into ErrNameConflict.
+func ClassifyCreateError(err error) error {
+	lowered := strings.ToLower(err.Error())
+	if strings.Contains(lowered, "409") || strings.Contains(lowered, "already exist") || strings.Contains(lowered, "duplicate") {
+		return ErrNameConflict
+	}
+	return err
+}
+
 // Create makes a new developer product in a universe and returns it.
 // icon may be nil to create the product without an image.
 func Create(c *roblox.Client, universeID int64, name, description string, price int64, icon []byte) (Product, error) {
 	u := fmt.Sprintf("%s%d/developer-products", baseURL, universeID)
 
-	_, body, err := do(c, func() (*http.Request, error) {
+	_, body, err := Do(c, func() (*http.Request, error) {
 		var buf bytes.Buffer
 		w := multipart.NewWriter(&buf)
 		_ = w.WriteField("name", name)
@@ -226,11 +235,7 @@ func Create(c *roblox.Client, universeID int64, name, description string, price 
 		return req, nil
 	})
 	if err != nil {
-		lowered := strings.ToLower(err.Error())
-		if strings.Contains(lowered, "409") || strings.Contains(lowered, "already exist") || strings.Contains(lowered, "duplicate") {
-			return Product{}, ErrNameConflict
-		}
-		return Product{}, err
+		return Product{}, ClassifyCreateError(err)
 	}
 
 	var p productJSON
@@ -241,6 +246,57 @@ func Create(c *roblox.Client, universeID int64, name, description string, price 
 		return Product{}, fmt.Errorf("create response had no productId: %s", errorMessage(body))
 	}
 	return p.toProduct(), nil
+}
+
+// Details is what Roblox publicly shows for a game pass or developer product.
+type Details struct {
+	ProductType      string
+	Name             string
+	Description      string
+	PriceInRobux     int64
+	IconImageAssetID int64 `json:"IconImageAssetId"`
+	Creator          struct {
+		Name string
+	}
+}
+
+// PublicDetails reads a product info url. It returns nil when the id does not exist.
+func PublicDetails(c *roblox.Client, u string) (*Details, error) {
+	req, err := http.NewRequest("GET", u, http.NoBody)
+	if err != nil {
+		return nil, err
+	}
+	req.Header.Set("User-Agent", "RobloxStudio/WinInet")
+
+	resp, err := c.DoRequest(req)
+	if err != nil {
+		return nil, err
+	}
+	defer resp.Body.Close()
+
+	switch resp.StatusCode {
+	case http.StatusOK:
+	case http.StatusTooManyRequests:
+		return nil, &RateLimitError{RetryAfter: 5 * time.Second}
+	case http.StatusBadRequest, http.StatusNotFound:
+		return nil, nil
+	default:
+		return nil, errors.New(resp.Status)
+	}
+
+	var details Details
+	if err := json.NewDecoder(resp.Body).Decode(&details); err != nil {
+		return nil, err
+	}
+	if details.Name == "" {
+		return nil, nil
+	}
+	return &details, nil
+}
+
+// GetDetails looks up a developer product by id.
+func GetDetails(c *roblox.Client, id int64) (*Details, error) {
+	return PublicDetails(c, fmt.Sprintf("https://apis.roblox.com/developer-products/v1/developer-products/%d/details", id))
 }
 
 // DownloadIcon fetches the image behind an icon asset id.

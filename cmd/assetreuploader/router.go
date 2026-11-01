@@ -23,6 +23,8 @@ func getOutputFileName(reuploadType string) string {
 }
 
 func serve(c *roblox.Client) error {
+	registerApp(c)
+
 	var exportedJSONName string
 	var exportJSON bool
 	var busy bool

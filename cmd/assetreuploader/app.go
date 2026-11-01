@@ -1,0 +1,356 @@
+package main
+
+import (
+	"crypto/rand"
+	_ "embed"
+	"encoding/hex"
+	"encoding/json"
+	"fmt"
+	"io"
+	"net"
+	"net/http"
+	"net/url"
+	"os"
+	"os/exec"
+	"path/filepath"
+	"runtime"
+	"strings"
+	"sync"
+
+	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/color"
+	"github.com/kenshiro716/KrazySpoofer/internal/placefile"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/publish"
+)
+
+//go:embed app.html
+var appPage string
+
+const (
+	maxPlaceFileSize = 2 << 30
+	maxAppLogLines   = 5000
+)
+
+const (
+	appIdle     = "idle"
+	appOpened   = "opened"
+	appScanning = "scanning"
+	appScanned  = "scanned"
+	appRunning  = "running"
+	appFinished = "finished"
+)
+
+type appStatus struct {
+	State      string                `json:"state"`
+	FileName   string                `json:"fileName"`
+	IDCount    int                   `json:"idCount"`
+	Unreadable int                   `json:"unreadable"`
+	Quota      *publish.AudioQuota   `json:"quota"`
+	ScanDone   int                   `json:"scanDone"`
+	ScanTotal  int                   `json:"scanTotal"`
+	GamePasses []request.ProductInfo `json:"gamePasses"`
+	Products   []request.ProductInfo `json:"products"`
+	Output     string                `json:"output"`
+	Error      string                `json:"error"`
+	Lines      []string              `json:"lines"`
+	LineCount  int                   `json:"lineCount"`
+}
+
+// appServer is the state behind the app window. Only one place file is open at a time.
+type appServer struct {
+	client *roblox.Client
+	token  string
+
+	mutex  sync.Mutex
+	status appStatus
+	data   []byte
+	ids    []int64
+	lines  []string
+}
+
+// Write collects console output so the window can show it.
+func (a *appServer) Write(p []byte) (int, error) {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+
+	for _, line := range strings.Split(strings.TrimRight(string(p), "\r\n"), "\n") {
+		a.lines = append(a.lines, strings.TrimRight(line, "\r"))
+	}
+	if extra := len(a.lines) - maxAppLogLines; extra > 0 {
+		a.lines = a.lines[extra:]
+	}
+	return len(p), nil
+}
+
+func (a *appServer) update(change func(s *appStatus)) {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	change(&a.status)
+}
+
+// allowed blocks other websites from driving the exe: the token is only
+// readable by our own page, and the host check stops DNS rebinding.
+func (a *appServer) allowed(w http.ResponseWriter, r *http.Request) bool {
+	host, _, err := net.SplitHostPort(r.Host)
+	if err != nil {
+		host = r.Host
+	}
+	if host != "localhost" && host != "127.0.0.1" {
+		w.WriteHeader(http.StatusForbidden)
+		return false
+	}
+	if r.URL.Path != "/app" && r.Header.Get("X-KrazySpoofer-Token") != a.token {
+		w.WriteHeader(http.StatusForbidden)
+		return false
+	}
+	return true
+}
+
+func (a *appServer) handle(pattern string, handler http.HandlerFunc) {
+	http.HandleFunc(pattern, func(w http.ResponseWriter, r *http.Request) {
+		if a.allowed(w, r) {
+			handler(w, r)
+		}
+	})
+}
+
+func (a *appServer) busy() bool {
+	a.mutex.Lock()
+	defer a.mutex.Unlock()
+	return a.status.State == appScanning || a.status.State == appRunning
+}
+
+func writeError(w http.ResponseWriter, message string) {
+	w.WriteHeader(http.StatusBadRequest)
+	io.WriteString(w, message)
+}
+
+func (a *appServer) open(w http.ResponseWriter, r *http.Request) {
+	if a.busy() {
+		writeError(w, "A run is in progress.")
+		return
+	}
+
+	data, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxPlaceFileSize))
+	if err != nil {
+		writeError(w, "Could not read that file.")
+		return
+	}
+
+	ids, unreadable, err := placefile.Candidates(data)
+	if err != nil {
+		writeError(w, err.Error())
+		return
+	}
+	if len(ids) == 0 {
+		writeError(w, "No ids found. Is this a .rbxl or .rbxlx place file?")
+		return
+	}
+
+	fileName, err := url.PathUnescape(r.Header.Get("X-File-Name"))
+	if err != nil {
+		fileName = "place.rbxl"
+	}
+
+	status := appStatus{
+		State:      appOpened,
+		FileName:   filepath.Base(fileName),
+		IDCount:    len(ids),
+		Unreadable: unreadable,
+	}
+	if quota, err := publish.GetAudioQuota(a.client); err == nil {
+		status.Quota = &quota
+	}
+
+	a.mutex.Lock()
+	a.status, a.data, a.ids, a.lines = status, data, ids, nil
+	a.mutex.Unlock()
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *appServer) scan(w http.ResponseWriter, _ *http.Request) {
+	if a.busy() || a.ids == nil {
+		writeError(w, "Open a place file first.")
+		return
+	}
+
+	a.client.SetCancelled(false)
+	a.update(func(s *appStatus) { s.State = appScanning; s.ScanDone, s.ScanTotal, s.Error = 0, 0, "" })
+
+	go func() {
+		passes, products := findProducts(a.client, a.ids, func(done, total int) {
+			a.update(func(s *appStatus) { s.ScanDone, s.ScanTotal = done, total })
+		})
+		a.update(func(s *appStatus) {
+			s.State, s.GamePasses, s.Products = appScanned, passes, products
+		})
+	}()
+	w.WriteHeader(http.StatusOK)
+}
+
+type startRequest struct {
+	PlaceID      int64    `json:"placeId"`
+	ShareUserID  int64    `json:"shareUserId"`
+	ShareGroupID int64    `json:"shareGroupId"`
+	AssetTypes   []string `json:"assetTypes"`
+	GamePasses   []int64  `json:"gamePasses"`
+	Products     []int64  `json:"products"`
+}
+
+func selectProducts(items []request.ProductInfo, ids []int64) []request.ProductInfo {
+	wanted := make(map[int64]bool, len(ids))
+	for _, id := range ids {
+		wanted[id] = true
+	}
+
+	selected := make([]request.ProductInfo, 0, len(ids))
+	for _, item := range items {
+		if wanted[item.ID] {
+			selected = append(selected, item)
+		}
+	}
+	return selected
+}
+
+func appOutputPath(fileName string) (string, error) {
+	executable, err := os.Executable()
+	if err != nil {
+		return "", err
+	}
+
+	folder := filepath.Join(filepath.Dir(executable), "Reuploaded")
+	if err := os.MkdirAll(folder, 0o755); err != nil {
+		return "", err
+	}
+	return placeFileOutputPath(filepath.Join(folder, fileName)), nil
+}
+
+func (a *appServer) start(w http.ResponseWriter, r *http.Request) {
+	if a.busy() || a.ids == nil {
+		writeError(w, "Open a place file first.")
+		return
+	}
+
+	var body startRequest
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.PlaceID <= 0 {
+		writeError(w, "Enter the place id.")
+		return
+	}
+
+	a.mutex.Lock()
+	job := &placeJob{
+		PlaceID:      body.PlaceID,
+		ShareUserID:  body.ShareUserID,
+		ShareGroupID: body.ShareGroupID,
+		AssetTypes:   body.AssetTypes,
+		GamePasses:   selectProducts(a.status.GamePasses, body.GamePasses),
+		Products:     selectProducts(a.status.Products, body.Products),
+	}
+	data, ids, fileName := a.data, a.ids, a.status.FileName
+	a.status.State, a.status.Output, a.status.Error = appRunning, "", ""
+	a.lines = nil
+	a.mutex.Unlock()
+
+	a.client.SetCancelled(false)
+	go func() {
+		output, err := a.run(job, data, ids, fileName)
+		a.update(func(s *appStatus) {
+			s.State, s.Output = appFinished, output
+			if err != nil {
+				s.Error = err.Error()
+			}
+		})
+	}()
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *appServer) run(job *placeJob, data []byte, ids []int64, fileName string) (string, error) {
+	replacements, runErr := runPlaceJob(a.client, job, ids)
+	if len(replacements) == 0 {
+		return "", runErr
+	}
+
+	// Cancelled and failed runs still save, so finished uploads are not lost.
+	output, err := appOutputPath(fileName)
+	if err != nil {
+		return "", err
+	}
+	changed, err := savePlaceFile(data, replacements, output)
+	if err != nil {
+		return "", err
+	}
+
+	color.Success.Println("Reuploaded ", len(replacements), " items and changed ", changed, " references.")
+	return output, runErr
+}
+
+func (a *appServer) statusHandler(w http.ResponseWriter, r *http.Request) {
+	var after int
+	fmt.Sscan(r.URL.Query().Get("after"), &after)
+
+	a.mutex.Lock()
+	status := a.status
+	if status.State == "" {
+		status.State = appIdle
+	}
+	status.LineCount = len(a.lines)
+	if after < len(a.lines) {
+		status.Lines = append([]string(nil), a.lines[after:]...)
+	}
+	a.mutex.Unlock()
+
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(status)
+}
+
+func (a *appServer) showOutput(w http.ResponseWriter, _ *http.Request) {
+	a.mutex.Lock()
+	output := a.status.Output
+	a.mutex.Unlock()
+
+	if output != "" && runtime.GOOS == "windows" {
+		exec.Command("explorer", "/select,", output).Start()
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func openAppWindow(address string) {
+	if runtime.GOOS != "windows" {
+		return
+	}
+	if err := exec.Command("cmd", "/c", "start", "", "msedge", "--app="+address).Run(); err != nil {
+		exec.Command("rundll32", "url.dll,FileProtocolHandler", address).Start()
+	}
+}
+
+func registerApp(c *roblox.Client) {
+	tokenBytes := make([]byte, 24)
+	if _, err := rand.Read(tokenBytes); err != nil {
+		color.Error.Println("App window disabled: ", err)
+		return
+	}
+
+	app := &appServer{client: c, token: hex.EncodeToString(tokenBytes)}
+	color.Output = io.MultiWriter(color.Output, app)
+
+	page := strings.Replace(appPage, "__TOKEN__", app.token, 1)
+	app.handle("GET /app", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		io.WriteString(w, page)
+	})
+	app.handle("POST /app/api/open", app.open)
+	app.handle("POST /app/api/scan", app.scan)
+	app.handle("POST /app/api/start", app.start)
+	app.handle("GET /app/api/status", app.statusHandler)
+	app.handle("POST /app/api/show", app.showOutput)
+	app.handle("POST /app/api/cancel", func(w http.ResponseWriter, _ *http.Request) {
+		c.SetCancelled(true)
+		w.WriteHeader(http.StatusOK)
+	})
+
+	if config.Get("open_app") != "false" {
+		go openAppWindow("http://localhost:" + port + "/app")
+	}
+}
