@@ -49,7 +49,8 @@ type Request = {
 	assetType: string,       
 	exportJson: boolean,     
 	isGroup: boolean,
-	products: { findDeveloperProducts.ProductInfo }?
+	products: { findDeveloperProducts.ProductInfo }?,
+	shareUserId: number?
 }
 
 local function scriptInjectionEnabled()
@@ -181,6 +182,7 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         defaultPlaceIds = placeArray or {},
         exportJson = plugin:GetSetting("ExportJSON"),
         products = products,
+        shareUserId = plugin:GetSetting("ShareUserId"),
     }
     
     local success, statusCode = connection:Send("/reupload", HttpService:JSONEncode(request))

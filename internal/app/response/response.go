@@ -12,6 +12,7 @@ type ResponseItem struct {
 
 type Response struct {
 	cache       []ResponseItem
+	newIDs      []int64
 	mutex       sync.RWMutex
 	onItemAdded func(i ResponseItem)
 }
@@ -32,11 +33,30 @@ func (r *Response) AddItem(i ResponseItem) {
 	r.mutex.Lock()
 
 	r.cache = append(r.cache, i)
+	r.newIDs = append(r.newIDs, i.NewID)
 	if r.onItemAdded != nil {
 		go r.onItemAdded(i)
 	}
 
 	r.mutex.Unlock()
+}
+
+// TakeNewIDs returns every new id added since the last call, without duplicates.
+func (r *Response) TakeNewIDs() []int64 {
+	r.mutex.Lock()
+	defer r.mutex.Unlock()
+
+	seen := make(map[int64]struct{}, len(r.newIDs))
+	ids := make([]int64, 0, len(r.newIDs))
+	for _, id := range r.newIDs {
+		if _, dup := seen[id]; dup {
+			continue
+		}
+		seen[id] = struct{}{}
+		ids = append(ids, id)
+	}
+	r.newIDs = nil
+	return ids
 }
 
 func (r *Response) Clear() {

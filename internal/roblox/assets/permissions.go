@@ -10,6 +10,8 @@ import (
 	"github.com/kenshiro716/Asset-Reuploader/internal/roblox"
 )
 
+var permissionsURL = "https://apis.roblox.com/asset-permissions-api/v1/assets/%d/permissions"
+
 var UpdatePermissionErrors = struct {
 	ErrTokenInvalid     error
 	ErrNotAuthenticated error
@@ -41,7 +43,7 @@ func newUpdatePermissionsRequest(assetID int64, body PermissionRequest) (*http.R
 		return nil, err
 	}
 
-	url := fmt.Sprintf("https://apis.roblox.com/asset-permissions-api/v1/assets/%d/permissions", assetID)
+	url := fmt.Sprintf(permissionsURL, assetID)
 	req, err := http.NewRequest("PATCH", url, bytes.NewReader(jsonBody))
 	if err != nil {
 		return req, err
@@ -79,8 +81,11 @@ func NewUpdatePermissionsHandler(c *roblox.Client, assetID int64, body Permissio
 		case http.StatusUnauthorized:
 			return nil, UpdatePermissionErrors.ErrNotAuthenticated
 		case http.StatusForbidden:
-			c.SetToken(resp.Header.Get("x-csrf-token"))
-			return nil, UpdatePermissionErrors.ErrTokenInvalid
+			if token := resp.Header.Get("x-csrf-token"); token != "" {
+				c.SetToken(token)
+				return nil, UpdatePermissionErrors.ErrTokenInvalid
+			}
+			fallthrough
 		default:
 			if response.Errors != nil {
 				if message := response.Errors[0].Message; message != "" {

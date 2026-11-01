@@ -7,6 +7,7 @@ import (
 	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/animation"
 	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/developerproduct"
 	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/mesh"
+	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/shared/assetutils"
 	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/shared/clientutils"
 	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/shared/permissions"
 	"github.com/kenshiro716/Asset-Reuploader/internal/app/assets/sound"
@@ -51,6 +52,12 @@ func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.R
 		}
 
 		reupload(ctx, req)
+
+		// Developer products are not assets, so they have no permissions to share.
+		newIDs := resp.TakeNewIDs()
+		if req.ShareUserID != 0 && assetType != "DeveloperProduct" {
+			assetutils.ShareWithUser(ctx, req, newIDs)
+		}
 		return nil
 	}, nil
 }

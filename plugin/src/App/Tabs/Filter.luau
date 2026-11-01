@@ -2,6 +2,11 @@
 local UiLibrary = require("../../UiLibrary")
 
 local MarketplaceService = game:GetService("MarketplaceService")
+local Players = game:GetService("Players")
+
+local function sharePlaceholder(label: string?): string
+    return if label then `Sharing with {label}` else "Share with user id"
+end
 
 return function(ui: UiLibrary.Ui, plugin: Plugin)
 	local tab = ui:CreateTab("Filter")
@@ -28,6 +33,38 @@ return function(ui: UiLibrary.Ui, plugin: Plugin)
     split2:CreateToggle("Search int/number values", function(state)
         plugin:SetSetting("NumVals", state)
     end, plugin:GetSetting("NumVals"))
+
+    local savedShareUserId = plugin:GetSetting("ShareUserId")
+    local shareInput; shareInput = split2:CreateInput(sharePlaceholder(if savedShareUserId and savedShareUserId ~= 0 then tostring(savedShareUserId) else nil), function(input)
+        local userId = tonumber(input)
+        if not userId then return end
+
+        local shareTextBox = shareInput.instance.TextBox
+        if userId == 0 then
+            plugin:SetSetting("ShareUserId", 0)
+            shareTextBox.PlaceholderText = sharePlaceholder()
+            ui:Notify("Notification", "Sharing turned off.")
+            return
+        end
+
+        local success, username = pcall(Players.GetNameFromUserIdAsync, Players, userId)
+        if not success then
+            ui:Notify("Notification", "Couldn't find a user with that id.")
+            return
+        end
+
+        plugin:SetSetting("ShareUserId", userId)
+        shareTextBox.PlaceholderText = sharePlaceholder(username)
+        ui:Notify("Notification", `Reuploads will be shared with {username}. They must be your friend.`)
+    end)
+    shareInput:AddTip(ui:CreateTip(
+        "Shares reuploaded animations, sounds and meshes with this user. They must be your friend. Enter 0 to turn it off."
+    ))
+
+    local shareTextBox = shareInput.instance.TextBox
+    shareTextBox:GetPropertyChangedSignal("Text"):Connect(function()
+        shareTextBox.Text = string.gsub(shareTextBox.Text, "%D", "")
+    end)
 
     placeList = tab:CreateList()
 
