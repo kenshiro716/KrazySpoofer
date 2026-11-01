@@ -14,6 +14,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/settings"
 	"github.com/kenshiro716/KrazySpoofer/internal/retry"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/assetdelivery"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
@@ -73,7 +74,7 @@ func Reupload(ctx *context.Context, r *request.Request) {
 			return
 		}
 
-		uploadHandler, err := ide.NewUploadMeshHandler(client, assetInfo.Name, ide.AssetDescription, assetData, groupID)
+		uploadHandler, err := ide.NewUploadMeshHandler(client, assetInfo.Name, settings.Get().AssetDescription, assetData, groupID)
 		if err != nil {
 			newUploadError("Failed to get upload handler", assetInfo, err)
 			return

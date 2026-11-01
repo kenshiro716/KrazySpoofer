@@ -10,6 +10,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/settings"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/developerproducts"
@@ -129,11 +130,16 @@ func run(ctx *context.Context, r *request.Request, items []request.ProductInfo, 
 			logger.Warn(fmt.Sprintf(">> %s(%d) had no price, set to 1 Robux", p.Name, p.ID))
 		}
 
+		description := p.Description
+		if custom := settings.Get().ProductDescription; custom != "" {
+			description = custom
+		}
+
 		name := p.Name
 		var created developerproducts.Product
 		for attempt := 1; ; attempt++ {
 			created, err = withRetry(ctx, r, func() (developerproducts.Product, error) {
-				return s.create(client, r.UniverseID, name, p.Description, price, icon)
+				return s.create(client, r.UniverseID, name, description, price, icon)
 			})
 			if !errors.Is(err, developerproducts.ErrNameConflict) || attempt >= maxNameTries {
 				break

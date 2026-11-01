@@ -19,6 +19,8 @@ import (
 
 	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/settings"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/usage"
 	"github.com/kenshiro716/KrazySpoofer/internal/color"
 	"github.com/kenshiro716/KrazySpoofer/internal/placefile"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
@@ -27,6 +29,12 @@ import (
 
 //go:embed app.html
 var appPage string
+
+//go:embed icon.png
+var appIcon []byte
+
+//go:embed plugin.rbxm
+var pluginFile []byte
 
 const (
 	maxPlaceFileSize = 2 << 30
@@ -101,7 +109,7 @@ func (a *appServer) allowed(w http.ResponseWriter, r *http.Request) bool {
 		w.WriteHeader(http.StatusForbidden)
 		return false
 	}
-	if r.URL.Path != "/app" && r.Header.Get("X-KrazySpoofer-Token") != a.token {
+	if r.URL.Path != "/app" && r.URL.Path != "/app/icon.png" && r.Header.Get("X-KrazySpoofer-Token") != a.token {
 		w.WriteHeader(http.StatusForbidden)
 		return false
 	}
@@ -305,6 +313,99 @@ func (a *appServer) statusHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(status)
 }
 
+func pluginsFolder() string {
+	return filepath.Join(os.Getenv("LOCALAPPDATA"), "Roblox", "Plugins")
+}
+
+func (a *appServer) installPlugin(w http.ResponseWriter, _ *http.Request) {
+	folder := pluginsFolder()
+	if err := os.MkdirAll(folder, 0o755); err != nil {
+		writeError(w, err.Error())
+		return
+	}
+	if err := os.WriteFile(filepath.Join(folder, "Uploaderv3Newest.rbxm"), pluginFile, 0o644); err != nil {
+		writeError(w, err.Error())
+		return
+	}
+
+	message := "Plugin installed. Restart Studio to load it."
+	if _, err := os.Stat(filepath.Join(folder, "Uploaderv3Newest.rbxmx")); err == nil {
+		message = "Plugin installed. Remove the old Uploaderv3Newest.rbxmx from the folder, then restart Studio."
+	}
+	io.WriteString(w, message)
+}
+
+func (a *appServer) openPluginFolder(w http.ResponseWriter, _ *http.Request) {
+	folder := pluginsFolder()
+	if err := os.MkdirAll(folder, 0o755); err == nil && runtime.GOOS == "windows" {
+		exec.Command("explorer", folder).Start()
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func avatarURL(c *roblox.Client) string {
+	address := fmt.Sprintf("https://thumbnails.roblox.com/v1/users/avatar-headshot?userIds=%d&size=150x150&format=Png", c.UserInfo.ID)
+	req, err := http.NewRequest("GET", address, http.NoBody)
+	if err != nil {
+		return ""
+	}
+	resp, err := c.DoRequest(req)
+	if err != nil {
+		return ""
+	}
+	defer resp.Body.Close()
+
+	var body struct {
+		Data []struct {
+			ImageURL string `json:"imageUrl"`
+		} `json:"data"`
+	}
+	if json.NewDecoder(resp.Body).Decode(&body) != nil || len(body.Data) == 0 {
+		return ""
+	}
+	return body.Data[0].ImageURL
+}
+
+// account never includes the cookie or API key, only whether a key is set.
+func (a *appServer) account(w http.ResponseWriter, _ *http.Request) {
+	response := map[string]any{
+		"id":          a.client.UserInfo.ID,
+		"username":    a.client.UserInfo.Username,
+		"displayName": a.client.UserInfo.DisplayName,
+		"avatar":      avatarURL(a.client),
+		"hasApiKey":   strings.TrimSpace(config.Get("api_key")) != "",
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (a *appServer) usage(w http.ResponseWriter, _ *http.Request) {
+	response := map[string]any{"today": usage.Get()}
+	if quota, err := publish.GetAudioQuota(a.client); err == nil {
+		response["quota"] = quota
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(response)
+}
+
+func (a *appServer) getSettings(w http.ResponseWriter, _ *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(settings.Get())
+}
+
+func (a *appServer) saveSettings(w http.ResponseWriter, r *http.Request) {
+	var body settings.Settings
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil {
+		writeError(w, "Those settings could not be read.")
+		return
+	}
+	if err := settings.Set(body); err != nil {
+		writeError(w, err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
 func (a *appServer) showOutput(w http.ResponseWriter, _ *http.Request) {
 	a.mutex.Lock()
 	output := a.status.Output
@@ -340,7 +441,17 @@ func registerApp(c *roblox.Client) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 		io.WriteString(w, page)
 	})
+	app.handle("GET /app/icon.png", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "image/png")
+		w.Write(appIcon)
+	})
 	app.handle("POST /app/api/open", app.open)
+	app.handle("GET /app/api/account", app.account)
+	app.handle("GET /app/api/usage", app.usage)
+	app.handle("GET /app/api/settings", app.getSettings)
+	app.handle("POST /app/api/settings", app.saveSettings)
+	app.handle("POST /app/api/plugin/install", app.installPlugin)
+	app.handle("POST /app/api/plugin/folder", app.openPluginFolder)
 	app.handle("POST /app/api/scan", app.scan)
 	app.handle("POST /app/api/start", app.start)
 	app.handle("GET /app/api/status", app.statusHandler)

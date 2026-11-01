@@ -3,131 +3,305 @@
 <head>
 <meta charset="utf-8">
 <title>KrazySpoofer</title>
+<link rel="icon" href="/app/icon.png">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root {
-  --bg: #140c20; --panel: #211534; --line: #4a326e; --field: #2f1f49;
-  --accent: #8a50f0; --accent-hover: #9d6af5; --text: #eee6fc; --dim: #a896c8;
-  --good: #5fe0a0; --warn: #f4c95d; --bad: #ff7b8a; --info: #7db4ff;
+  --bg: #0f0f12; --side: #17171b; --card: #1a1a1f; --card2: #222228; --line: #2e2e36;
+  --accent: #6366f1; --accent2: #4f46e5; --accent3: #4338ca;
+  --text: #f4f4f6; --dim: #a1a1aa; --faint: #71717a;
+  --good: #4ade80; --warn: #fbbf24; --bad: #f87171; --info: #60a5fa;
 }
 * { box-sizing: border-box; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 14px/1.45 "Segoe UI", system-ui, sans-serif; }
-main { max-width: 860px; margin: 0 auto; padding: 20px 16px 32px; display: grid; gap: 14px; }
-h1 { margin: 0; font-size: 22px; letter-spacing: .3px; }
-h2 { margin: 0 0 10px; font-size: 13px; color: var(--dim); font-weight: 600; text-transform: uppercase; letter-spacing: .6px; }
-header p { margin: 2px 0 0; color: var(--dim); }
-section { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px; }
-.drop { display: block; border: 1px dashed var(--line); border-radius: 8px; padding: 22px; text-align: center; color: var(--dim); cursor: pointer; }
+html, body { height: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "Segoe UI", system-ui, sans-serif; display: flex; overflow: hidden; }
+
+aside { width: 280px; flex: none; background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.brand { display: flex; gap: 12px; align-items: center; padding: 22px 20px; border-bottom: 1px solid var(--line); }
+.brand img { width: 56px; height: 56px; border-radius: 50%; }
+.brand b { font-size: 21px; line-height: 1.15; }
+.nav-label { padding: 22px 20px 8px; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: var(--faint); text-transform: uppercase; }
+nav button { display: flex; width: 100%; align-items: center; gap: 12px; border: 0; background: none; color: var(--dim); font: inherit; font-weight: 600; padding: 14px 20px; cursor: pointer; text-align: left; text-decoration: none; }
+nav a { display: flex; align-items: center; gap: 12px; color: var(--dim); font-weight: 600; padding: 14px 20px; text-decoration: none; }
+nav button:hover, nav a:hover { color: var(--text); background: var(--card); }
+nav button.active { background: var(--accent); color: #fff; }
+nav svg { width: 19px; height: 19px; flex: none; }
+.me { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
+.me img { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); flex: none; }
+.me b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.me small { color: var(--dim); }
+.me div { min-width: 0; }
+
+main { flex: 1; min-width: 0; overflow: auto; }
+.top { padding: 28px 44px; border-bottom: 1px solid var(--line); }
+.top h1 { margin: 0; font-size: 36px; line-height: 1.2; }
+.top p { margin: 2px 0 0; color: var(--dim); font-size: 17px; }
+.page { padding: 32px 44px 48px; max-width: 1300px; display: none; }
+.page.active { display: block; }
+h2 { font-size: 26px; margin: 0; }
+.sub { color: var(--dim); margin: 2px 0 20px; }
+
+.tabs { display: flex; background: var(--accent3); border-radius: 12px; padding: 5px; margin-bottom: 26px; }
+.tabs button { flex: 1; border: 0; border-radius: 9px; background: none; color: #fff; font: inherit; font-weight: 600; padding: 13px; cursor: pointer; }
+.tabs button.active { background: var(--accent); }
+.tabpage { display: none; }
+.tabpage.active { display: block; }
+
+.card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
+.card h3 { margin: 0 0 4px; font-size: 20px; }
+.card > p { margin: 0 0 16px; color: var(--dim); }
+.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
+.step { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
+.step b { font-size: 17px; }
+.step p { margin: 0 0 12px; color: var(--dim); flex: 1; }
+
+button.btn { background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+button.btn:hover:not(:disabled) { border-color: var(--accent); }
+button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+button.primary:hover:not(:disabled) { background: var(--accent2); }
+button.btn:disabled { opacity: .45; cursor: default; }
+
+.drop { display: block; border: 2px dashed var(--line); border-radius: 10px; padding: 34px; text-align: center; color: var(--dim); cursor: pointer; }
 .drop.over, .drop:hover { border-color: var(--accent); color: var(--text); }
 .drop input { display: none; }
-.grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; }
-label.field { display: grid; gap: 4px; color: var(--dim); font-size: 13px; }
-input[type=text] { width: 100%; background: var(--field); border: 1px solid var(--line); border-radius: 6px; color: var(--text); padding: 8px 10px; font: inherit; }
-input[type=text]:focus { outline: 1px solid var(--accent); }
-.checks { display: flex; flex-wrap: wrap; gap: 14px; margin-top: 12px; }
-.checks label { display: flex; gap: 6px; align-items: center; cursor: pointer; }
-input[type=checkbox] { accent-color: var(--accent); }
-.actions { display: flex; flex-wrap: wrap; gap: 8px; }
-button { background: var(--field); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 8px 14px; font: inherit; cursor: pointer; }
-button:hover:not(:disabled) { border-color: var(--accent); }
-button.primary { background: var(--accent); border-color: var(--accent); color: #fff; font-weight: 600; }
-button.primary:hover:not(:disabled) { background: var(--accent-hover); }
-button:disabled { opacity: .45; cursor: default; }
-.bar { height: 8px; background: var(--field); border-radius: 4px; overflow: hidden; margin-top: 12px; }
+#summary { margin-top: 10px; color: var(--dim); min-height: 22px; }
+.fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
+label.field { display: grid; gap: 6px; font-weight: 600; }
+label.field small { color: var(--dim); font-weight: 400; }
+input[type=text], textarea { width: 100%; background: #16161a; border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 10px 12px; font: inherit; }
+textarea { min-height: 110px; resize: vertical; font-family: Consolas, monospace; font-size: 14px; }
+input[type=text]:focus, textarea:focus { outline: 1px solid var(--accent); }
+.checks { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; }
+.check { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
+.actions { display: flex; flex-wrap: wrap; gap: 10px; }
+.bar { height: 10px; background: var(--card2); border-radius: 5px; overflow: hidden; margin-top: 16px; }
 .bar div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
-#summary { margin-top: 8px; color: var(--dim); min-height: 20px; }
-#message { color: var(--bad); min-height: 20px; }
-#message.ok { color: var(--good); }
-.items { display: grid; gap: 4px; max-height: 220px; overflow: auto; }
-.items label { display: flex; gap: 8px; padding: 4px 6px; border-radius: 4px; cursor: pointer; overflow-wrap: anywhere; }
-.items label:hover { background: var(--field); }
+.message { min-height: 22px; margin-top: 10px; color: var(--bad); }
+.message.ok { color: var(--good); }
+.items { display: grid; gap: 2px; max-height: 260px; overflow: auto; }
+.items label { display: flex; gap: 10px; padding: 7px 8px; border-radius: 6px; cursor: pointer; overflow-wrap: anywhere; }
+.items label:hover { background: var(--card2); }
 .items small { color: var(--dim); }
-#log { margin: 0; height: 260px; overflow: auto; background: #0e0818; border: 1px solid var(--line); border-radius: 6px; padding: 10px; font: 12px/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+
+.account { display: flex; align-items: center; gap: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 24px; margin-bottom: 28px; flex-wrap: wrap; }
+.account img { width: 96px; height: 96px; border-radius: 50%; background: var(--accent); }
+.account div { flex: 1; min-width: 160px; }
+.account small { display: block; color: var(--dim); font-weight: 600; }
+.tag { border: 1px solid; border-radius: 6px; padding: 3px 10px; font-size: 13px; font-weight: 600; }
+.tag.on { color: var(--good); background: #0f2a1b; }
+.tag.off { color: var(--warn); background: #33280c; }
+
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
+.stat { border: 1px solid var(--accent); border-radius: 12px; padding: 18px 20px; }
+.stat small { color: var(--dim); font-size: 15px; }
+.stat b { display: block; font-size: 34px; line-height: 1.3; }
+.usage { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; font-size: 17px; margin-top: 14px; }
+.usage span { color: var(--dim); font-weight: 400; font-size: 15px; }
+
+.setting { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; font-size: 17px; cursor: pointer; }
+.config-field { margin-top: 18px; }
+.config-field b { display: block; font-size: 17px; }
+.config-field small { display: block; color: var(--dim); margin-bottom: 6px; font-size: 14px; }
+
+#log { margin: 0; height: 460px; overflow: auto; background: #0b0b0e; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font: 13px/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .c31 { color: var(--bad); } .c32 { color: var(--good); } .c33 { color: var(--warn); } .c34 { color: var(--info); }
 [hidden] { display: none !important; }
+
+@media (max-width: 760px) {
+  aside { width: 72px; }
+  .brand b, .brand { font-size: 0; padding: 14px 10px; justify-content: center; }
+  .brand img { width: 44px; height: 44px; }
+  .nav-label { display: none; }
+  nav button, nav a { font-size: 0; justify-content: center; padding: 14px 0; gap: 0; }
+  .me { justify-content: center; padding: 12px 0; }
+  .me div { display: none; }
+  .top, .page { padding-left: 16px; padding-right: 16px; }
+  .top h1 { font-size: 28px; }
+}
 </style>
 </head>
 <body>
+<aside>
+  <div class="brand"><img src="/app/icon.png" alt=""><b>Krazy<br>Spoofer</b></div>
+  <div class="nav-label">Dashboard</div>
+  <nav>
+    <button data-page="assets" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V4m0 0L7 9m5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>Manage Assets</button>
+    <button data-page="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Manage Account</button>
+    <button data-page="usage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V10m7 10V4m7 16v-7"/></svg>Daily Usage</button>
+    <button data-page="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h10m4 0h2M4 12h2m4 0h10M4 18h8m4 0h4"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg>Configuration</button>
+    <button data-page="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8m4 12h4"/></svg>Activity</button>
+  </nav>
+  <div class="nav-label">Links</div>
+  <nav>
+    <a href="https://github.com/kenshiro716/KrazySpoofer" target="_blank" rel="noreferrer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 4h6v6m0-6L10 14M8 6H5a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-3"/></svg>GitHub</a>
+  </nav>
+  <div class="me">
+    <img id="meAvatar" alt="">
+    <div><b id="meName">Loading...</b><small id="meId"></small></div>
+  </div>
+</aside>
+
 <main>
-  <header>
-    <h1>KrazySpoofer</h1>
-    <p>Reupload a place file's assets and save a new copy. Your original file is never changed.</p>
-  </header>
+  <div class="top">
+    <h1>Dashboard</h1>
+    <p>Easily manage assets in your game</p>
+  </div>
 
-  <section>
-    <h2>Place file</h2>
-    <label class="drop" id="drop">
-      <input type="file" id="file" accept=".rbxl,.rbxlx">
-      <span id="dropText">Drop a .rbxl or .rbxlx here, or click to choose one</span>
-    </label>
-    <div id="summary"></div>
-  </section>
-
-  <section>
-    <h2>Settings</h2>
-    <div class="grid">
-      <label class="field">Place id to reupload for
-        <input type="text" id="placeId" inputmode="numeric" autocomplete="off">
-      </label>
-      <label class="field">Share with user id (friends only)
-        <input type="text" id="shareUser" inputmode="numeric" autocomplete="off">
-      </label>
-      <label class="field">Share with group id
-        <input type="text" id="shareGroup" inputmode="numeric" autocomplete="off">
-      </label>
+  <div class="page active" id="page-assets">
+    <div class="tabs">
+      <button data-tab="plugin" class="active">Studio Plugin</button>
+      <button data-tab="file">.RBXL File</button>
     </div>
-    <div class="checks">
-      <label><input type="checkbox" value="Animation" class="type" checked> Animations</label>
-      <label><input type="checkbox" value="Sound" class="type" checked> Sounds</label>
-      <label><input type="checkbox" value="Mesh" class="type" checked> Meshes</label>
+
+    <div class="tabpage active" id="tab-plugin">
+      <h2>Connect with Studio Plugin</h2>
+      <p class="sub">Connect KrazySpoofer to Roblox Studio</p>
+      <div class="card">
+        <h3>Step 1: Install the Plugin</h3>
+        <p>Install the Uploaderv3Newest plugin in Roblox Studio. Skip this step if you already installed it.</p>
+        <div class="steps">
+          <div class="step"><b>Install it for me</b><p>Copies the plugin into your Studio plugins folder.</p><button class="btn" id="installPlugin">Install Plugin</button></div>
+          <div class="step"><b>Open your plugin folder</b><p>See what's installed, or remove an older copy.</p><button class="btn primary" id="openPlugins">Open Plugin Folder</button></div>
+        </div>
+        <div class="message" id="pluginMessage"></div>
+      </div>
+      <div class="card">
+        <h3>Step 2: Reupload from Studio</h3>
+        <p>Keep this app open, then open your game in Studio and use the Uploaderv3Newest toolbar button. Progress shows in Activity.</p>
+      </div>
     </div>
-  </section>
 
-  <section id="productsPanel" hidden>
-    <h2>Game passes and developer products</h2>
-    <p id="productsHint">Numbers in a game can match a product by chance. Only tick the ones that belong to this game.</p>
-    <div class="items" id="items"></div>
-  </section>
-
-  <section>
-    <div class="actions">
-      <button id="scan" disabled>Find game passes and products</button>
-      <button id="start" class="primary" disabled>Start reupload</button>
-      <button id="cancel" disabled>Cancel</button>
-      <button id="show" hidden>Show saved file</button>
+    <div class="tabpage" id="tab-file">
+      <h2>Reupload a Place File</h2>
+      <p class="sub">Saves a new copy in the Reuploaded folder. Your original file is never changed.</p>
+      <div class="card">
+        <label class="drop" id="drop">
+          <input type="file" id="file" accept=".rbxl,.rbxlx">
+          <span id="dropText">Drop a .rbxl or .rbxlx here, or click to choose one</span>
+        </label>
+        <div id="summary"></div>
+      </div>
+      <div class="card">
+        <div class="fields">
+          <label class="field">Place ID<small>The game to reupload for</small><input type="text" id="placeId" inputmode="numeric" autocomplete="off"></label>
+          <label class="field">Share with user ID<small>They must be your friend</small><input type="text" id="shareUser" inputmode="numeric" autocomplete="off"></label>
+          <label class="field">Share with group ID<small>Optional</small><input type="text" id="shareGroup" inputmode="numeric" autocomplete="off"></label>
+        </div>
+        <div class="checks">
+          <label class="check"><input type="checkbox" value="Animation" class="type" checked> Animations</label>
+          <label class="check"><input type="checkbox" value="Sound" class="type" checked> Audio</label>
+          <label class="check"><input type="checkbox" value="Mesh" class="type" checked> Meshes</label>
+        </div>
+      </div>
+      <div class="card" id="productsPanel" hidden>
+        <h3>Gamepasses and Developer Products</h3>
+        <p id="productsHint"></p>
+        <div class="items" id="items"></div>
+      </div>
+      <div class="card">
+        <div class="actions">
+          <button class="btn" id="scan" disabled>Find Gamepasses &amp; Products</button>
+          <button class="btn primary" id="start" disabled>Start Reupload</button>
+          <button class="btn" id="cancel" disabled>Cancel</button>
+          <button class="btn" id="show" hidden>Show Saved File</button>
+        </div>
+        <div class="bar"><div id="progress"></div></div>
+        <div class="message" id="message"></div>
+      </div>
     </div>
-    <div class="bar"><div id="progress"></div></div>
-    <div id="message"></div>
-  </section>
+  </div>
 
-  <section>
-    <h2>Log</h2>
+  <div class="page" id="page-accounts">
+    <h2>My Account</h2>
+    <p class="sub">The account used to download and upload</p>
+    <div class="account">
+      <img id="accountAvatar" alt="">
+      <div><small>Username</small><span id="accountName"></span></div>
+      <div><small>UserId</small><span id="accountId"></span></div>
+    </div>
+    <h2>My API Key</h2>
+    <p class="sub">Open Cloud key, stored in api-key.txt next to the exe</p>
+    <div class="account">
+      <div><small>Status</small><span class="tag" id="apiKey"></span></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-usage">
+    <h2>Daily Usage</h2>
+    <p class="sub">What you've reuploaded today</p>
+    <div class="stats">
+      <div class="stat"><small>Reuploaded today</small><b id="usageTotal">0</b></div>
+      <div class="stat"><small>Audio this period</small><b id="usageAudio">-</b></div>
+    </div>
+    <div class="card">
+      <h3>Today</h3>
+      <div id="usageRows"></div>
+      <div class="usage" style="margin-top:22px">Audio upload limit <span id="quotaText">Not available</span></div>
+      <div class="bar"><div id="quotaBar"></div></div>
+    </div>
+  </div>
+
+  <div class="page" id="page-config">
+    <h2>Configuration</h2>
+    <p class="sub">Configure application settings</p>
+    <label class="setting"><input type="checkbox" id="skipOwned"> Skip assets you already own</label>
+    <label class="setting"><input type="checkbox" id="skipPublic"> Skip public assets</label>
+    <div class="config-field"><b>Comma separated list of group IDs to skip</b><small>Assets from these groups are not reuploaded</small><input type="text" id="skipGroups" placeholder="e.g., 123,456,789"></div>
+    <div class="config-field"><b>Comma separated list of user IDs to skip</b><small>Assets from these users are not reuploaded</small><input type="text" id="skipUsers" placeholder="e.g., 123,456,789"></div>
+    <div class="config-field"><b>Custom Asset Description</b><small>Set on reuploaded animations and meshes. Audio has no description field.</small><textarea id="assetDescription" placeholder="Enter a custom asset description..."></textarea></div>
+    <div class="config-field"><b>Custom Product Description</b><small>Replaces gamepass and developer product descriptions. Leave empty to keep the originals.</small><textarea id="productDescription" placeholder="Enter a custom product description..."></textarea></div>
+    <div style="margin-top:20px"><button class="btn primary" id="saveConfig">Save</button></div>
+    <div class="message" id="configMessage"></div>
+  </div>
+
+  <div class="page" id="page-activity">
+    <h2>Activity</h2>
+    <p class="sub">Live log from this app</p>
     <pre id="log"></pre>
-  </section>
+  </div>
 </main>
+
 <script>
 const token = "__TOKEN__";
 const $ = id => document.getElementById(id);
 const headers = { "X-KrazySpoofer-Token": token };
 let lineCount = 0, shownItems = "", lastState = "";
 
-function say(text, ok) {
-  $("message").textContent = text || "";
-  $("message").className = ok ? "ok" : "";
+function say(text, ok, id) {
+  const box = $(id || "message");
+  box.textContent = text || "";
+  box.className = ok ? "message ok" : "message";
 }
 
-async function post(path, options) {
+async function post(path, options, id) {
   const response = await fetch("/app/api/" + path, { method: "POST", ...options, headers: { ...headers, ...(options && options.headers) } });
-  if (!response.ok) say(await response.text());
-  return response.ok;
+  if (!response.ok) say(await response.text(), false, id);
+  return response;
 }
+
+async function getJSON(path) {
+  const response = await fetch("/app/api/" + path, { headers });
+  return response.json();
+}
+
+document.querySelectorAll("nav button").forEach(button => button.addEventListener("click", () => {
+  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b === button));
+  document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + button.dataset.page));
+  if (button.dataset.page === "usage") loadUsage();
+}));
+
+document.querySelectorAll(".tabs button").forEach(button => button.addEventListener("click", () => {
+  document.querySelectorAll(".tabs button").forEach(b => b.classList.toggle("active", b === button));
+  document.querySelectorAll(".tabpage").forEach(p => p.classList.toggle("active", p.id === "tab-" + button.dataset.tab));
+}));
 
 async function openFile(file) {
   if (!file) return;
   say("");
   $("dropText").textContent = "Reading " + file.name + "...";
-  const ok = await post("open", { body: file, headers: { "X-File-Name": encodeURIComponent(file.name) } });
-  if (!ok) $("dropText").textContent = "Drop a .rbxl or .rbxlx here, or click to choose one";
+  const response = await post("open", { body: file, headers: { "X-File-Name": encodeURIComponent(file.name) } });
+  if (!response.ok) $("dropText").textContent = "Drop a .rbxl or .rbxlx here, or click to choose one";
   refresh();
 }
 
@@ -140,12 +314,17 @@ for (const id of ["placeId", "shareUser", "shareGroup"]) {
   $(id).addEventListener("input", () => { $(id).value = $(id).value.replace(/\D/g, ""); });
 }
 
+$("installPlugin").addEventListener("click", async () => {
+  const response = await post("plugin/install", {}, "pluginMessage");
+  if (response.ok) say(await response.text(), true, "pluginMessage");
+});
+$("openPlugins").addEventListener("click", () => post("plugin/folder", {}, "pluginMessage"));
 $("scan").addEventListener("click", () => { say(""); post("scan"); });
 $("cancel").addEventListener("click", () => post("cancel"));
 $("show").addEventListener("click", () => post("show"));
 $("start").addEventListener("click", () => {
   say("");
-  if (!$("placeId").value) return say("Enter the place id.");
+  if (!$("placeId").value) return say("Enter the place ID.");
   const picked = kind => [...document.querySelectorAll("input[data-kind=" + kind + "]:checked")].map(i => Number(i.value));
   post("start", { body: JSON.stringify({
     placeId: Number($("placeId").value),
@@ -157,19 +336,80 @@ $("start").addEventListener("click", () => {
   }) });
 });
 
+const parseIDs = text => text.split(",").map(v => Number(v.trim())).filter(v => Number.isInteger(v) && v > 0);
+
+async function loadSettings() {
+  const s = await getJSON("settings");
+  $("skipOwned").checked = s.skipOwned;
+  $("skipPublic").checked = s.skipPublic;
+  $("skipGroups").value = (s.skipGroupIds || []).join(",");
+  $("skipUsers").value = (s.skipUserIds || []).join(",");
+  $("assetDescription").value = s.assetDescription || "";
+  $("productDescription").value = s.productDescription || "";
+}
+
+$("saveConfig").addEventListener("click", async () => {
+  const response = await post("settings", { body: JSON.stringify({
+    skipOwned: $("skipOwned").checked,
+    skipPublic: $("skipPublic").checked,
+    skipGroupIds: parseIDs($("skipGroups").value),
+    skipUserIds: parseIDs($("skipUsers").value),
+    assetDescription: $("assetDescription").value,
+    productDescription: $("productDescription").value,
+  }) }, "configMessage");
+  if (response.ok) say("Saved.", true, "configMessage");
+});
+
+async function loadAccount() {
+  const account = await getJSON("account");
+  $("meName").textContent = "@" + (account.username || "unknown");
+  $("meId").textContent = account.id;
+  $("accountName").textContent = account.username;
+  $("accountId").textContent = account.id;
+  if (account.avatar) $("meAvatar").src = $("accountAvatar").src = account.avatar;
+  $("apiKey").textContent = account.hasApiKey ? "Key saved" : "No key";
+  $("apiKey").className = "tag " + (account.hasApiKey ? "on" : "off");
+}
+
+const usageLabels = { Animation: "Animations", Sound: "Audio", Mesh: "Meshes", GamePass: "Gamepasses", DeveloperProduct: "Developer Products" };
+
+async function loadUsage() {
+  const usage = await getJSON("usage");
+  $("usageRows").textContent = "";
+  let total = 0;
+  for (const [type, label] of Object.entries(usageLabels)) {
+    const count = usage.today[type] || 0;
+    total += count;
+    const row = document.createElement("div");
+    row.className = "usage";
+    row.textContent = label;
+    const value = document.createElement("span");
+    value.textContent = count + " today";
+    row.append(value);
+    $("usageRows").append(row);
+  }
+  $("usageTotal").textContent = total;
+
+  if (usage.quota) {
+    $("usageAudio").textContent = usage.quota.usage + " / " + usage.quota.capacity;
+    $("quotaText").textContent = "Used " + usage.quota.usage + " of " + usage.quota.capacity;
+    $("quotaBar").style.width = Math.min(100, 100 * usage.quota.usage / usage.quota.capacity) + "%";
+  }
+}
+
 function addLine(line) {
-  const span = document.createElement("div");
+  const row = document.createElement("div");
   const color = line.match(/\x1b\[(3[1-4])m/);
-  if (color) span.className = "c" + color[1];
-  span.textContent = line.replace(/\x1b\[[0-9;]*m/g, "");
-  $("log").append(span);
-  const progress = span.textContent.match(/\[(\d+)(?:-\d+)?\/(\d+)\]/);
+  if (color) row.className = "c" + color[1];
+  row.textContent = line.replace(/\x1b\[[0-9;]*m/g, "");
+  $("log").append(row);
+  const progress = row.textContent.match(/\[(\d+)(?:-\d+)?\/(\d+)\]/);
   if (progress) $("progress").style.width = Math.min(100, 100 * progress[1] / progress[2]) + "%";
 }
 
 function showItems(status) {
   const passes = status.gamePasses || [], products = status.products || [];
-  const key = JSON.stringify([passes.map(p => p.id), products.map(p => p.id)]);
+  const key = JSON.stringify([status.state === "scanned", passes.map(p => p.id), products.map(p => p.id)]);
   if (key === shownItems) return;
   shownItems = key;
 
@@ -188,12 +428,12 @@ function showItems(status) {
     const text = document.createElement("span");
     text.textContent = item.name + " ";
     const details = document.createElement("small");
-    details.textContent = label + " · " + item.id + " · " + item.price + " Robux · by " + (item.creator || "unknown");
+    details.textContent = label + " · " + item.id + " · " + item.price + " Robux" + (item.creator ? " · by " + item.creator : "");
     text.append(details);
     row.append(box, text);
     $("items").append(row);
   };
-  passes.forEach(p => add(p, "pass", "Game pass"));
+  passes.forEach(p => add(p, "pass", "Gamepass"));
   products.forEach(p => add(p, "product", "Developer product"));
 }
 
@@ -203,7 +443,7 @@ function render(status) {
 
   if (hasFile) {
     $("dropText").textContent = status.fileName || "Place file";
-    let text = status.idCount + " possible ids found.";
+    let text = status.idCount + " possible IDs found.";
     if (status.quota) text += " Audio uploads used: " + status.quota.usage + "/" + status.quota.capacity + ".";
     if (status.unreadable) text += " " + status.unreadable + " attribute sets could not be read and will not change.";
     $("summary").textContent = text;
@@ -215,10 +455,10 @@ function render(status) {
   $("show").hidden = !status.output;
 
   if (state === "scanning") {
-    say(status.scanTotal ? "Checking " + status.scanDone + "/" + status.scanTotal + " numbers..." : "Checking which ids are assets...", true);
+    say(status.scanTotal ? "Checking " + status.scanDone + "/" + status.scanTotal + " numbers..." : "Checking which IDs are assets...", true);
     if (status.scanTotal) $("progress").style.width = 100 * status.scanDone / status.scanTotal + "%";
   } else if (state === "running") {
-    say("Reuploading...", true);
+    say("Reuploading... See Activity for details.", true);
   } else if (lastState && lastState !== state) {
     if (status.error) say(status.error);
     else if (status.output) say("Done. Saved to " + status.output, true);
@@ -227,7 +467,6 @@ function render(status) {
     if (status.output) $("progress").style.width = "100%";
   }
   lastState = state;
-
   showItems(status);
 }
 
@@ -252,6 +491,8 @@ async function refresh() {
   }
 }
 
+loadAccount();
+loadSettings();
 refresh();
 setInterval(refresh, 700);
 </script>

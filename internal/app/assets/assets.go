@@ -14,6 +14,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
+	"github.com/kenshiro716/KrazySpoofer/internal/app/usage"
 	"github.com/kenshiro716/KrazySpoofer/internal/console"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 )
@@ -56,6 +57,7 @@ func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.R
 
 		// Products and passes are not assets, so they have no permissions to share.
 		newIDs := resp.TakeNewIDs()
+		usage.Add(assetType, len(newIDs))
 		if assetType != "DeveloperProduct" && assetType != "GamePass" {
 			assetutils.ShareAssets(ctx, req, newIDs)
 		}

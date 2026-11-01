@@ -21,9 +21,6 @@ const (
 	operationBaseURL = "https://apis.roblox.com/assets/v1/operations/"
 	maxPollAttempts  = 30
 	pollInterval     = time.Second
-
-	// AssetDescription is set on every animation and mesh this tool uploads.
-	AssetDescription = "Made By Ranji"
 )
 
 var errTokenInvalid = errors.New("XSRF token validation failed")
