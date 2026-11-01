@@ -2,7 +2,6 @@
 local AssetIdFilter = require("./AssetIdFilter")
 local findDeveloperProducts = require("./FindDeveloperProducts")
 local Connection = require("./Connection")
-local License = require("./License")
 local retry = require("./Retry")
 local StatusCodes = require("./StatusCodes")
 local UiLibrary = require("../UiLibrary")
@@ -92,13 +91,6 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         return 
     end
     busy = true
-
-    local licensed, licenseMessage = License.check(plugin:GetSetting("LicenseKey"))
-    if not licensed then
-        ui:Notify("Notification", licenseMessage)
-        busy = false
-        return
-    end
 
     if not scriptInjectionEnabled() then
         ui:Notify("Notification", "Plugin needs script injection permission.")

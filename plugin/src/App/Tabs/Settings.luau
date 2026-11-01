@@ -1,5 +1,4 @@
 --!strict
-local License = require("../License")
 local UiLibrary = require("../../UiLibrary")
 
 return function(ui: UiLibrary.Ui, plugin: Plugin)
@@ -21,14 +20,4 @@ return function(ui: UiLibrary.Ui, plugin: Plugin)
     split:CreateToggle("Export json when done", function(state)
         plugin:SetSetting("ExportJSON", state)
     end, plugin:GetSetting("ExportJSON"))
-
-    local licenseSplit = tab:CreateSplit()
-    local licenseInput; licenseInput = licenseSplit:CreateInput(plugin:GetSetting("LicenseKey") and "License key saved" or "License key", function(input)
-        local licensed, message = License.check(input)
-        ui:Notify("Notification", message)
-        if not licensed then return end
-
-        plugin:SetSetting("LicenseKey", input)
-        licenseInput.instance.TextBox.PlaceholderText = "License key saved"
-    end)
 end
