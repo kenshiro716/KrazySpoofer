@@ -12,6 +12,7 @@ import (
 )
 
 func Input(m string) (string, error) {
+	attach()
 	fmt.Print(m)
 
 	reader := bufio.NewReader(os.Stdin)

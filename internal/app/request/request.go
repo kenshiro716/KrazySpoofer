@@ -49,6 +49,20 @@ type Request struct {
 func FromRawRequest(c *roblox.Client, req *RawRequest) (*Request, error) {
 	placeID := req.PlaceID
 
+	// Place files can upload to the account without a game.
+	if placeID == 0 {
+		return &Request{
+			CreatorID:       req.CreatorID,
+			IDs:             req.IDs,
+			DefaultPlaceIDs: req.DefaultPlaceIDs,
+			IsGroup:         req.IsGroup,
+			Products:        req.Products,
+			GamePasses:      req.GamePasses,
+			ShareUserID:     req.ShareUserID,
+			ShareGroupID:    req.ShareGroupID,
+		}, nil
+	}
+
 	placesInfo, err := games.MultiGetPlaceDetails(c, []int64{placeID})
 	if err != nil {
 		return nil, err

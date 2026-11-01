@@ -68,9 +68,9 @@ button.btn:disabled { opacity: .45; cursor: default; }
 .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
 label.field { display: grid; gap: 6px; font-weight: 600; }
 label.field small { color: var(--dim); font-weight: 400; }
-input[type=text], textarea { width: 100%; background: #16161a; border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 10px 12px; font: inherit; }
+input[type=text], textarea, select { width: 100%; background: #16161a; border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 10px 12px; font: inherit; }
 textarea { min-height: 110px; resize: vertical; font-family: Consolas, monospace; font-size: 14px; }
-input[type=text]:focus, textarea:focus { outline: 1px solid var(--accent); }
+input[type=text]:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); }
 .checks { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; }
 .check { display: flex; gap: 10px; align-items: center; cursor: pointer; }
 input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
@@ -184,7 +184,10 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
       </div>
       <div class="card">
         <div class="fields">
-          <label class="field">Place ID<small>The game to reupload for</small><input type="text" id="placeId" inputmode="numeric" autocomplete="off"></label>
+          <label class="field">Your game (optional)<small>Pick one, enter a place ID, or leave empty</small>
+            <select id="gamePick"><option value="">No game, upload to my account</option></select>
+            <input type="text" id="placeId" inputmode="numeric" autocomplete="off" placeholder="Place ID">
+          </label>
           <label class="field">Share with user ID<small>They must be your friend</small><input type="text" id="shareUser" inputmode="numeric" autocomplete="off"></label>
           <label class="field">Share with group ID<small>Optional</small><input type="text" id="shareGroup" inputmode="numeric" autocomplete="off"></label>
         </div>
@@ -314,6 +317,15 @@ for (const id of ["placeId", "shareUser", "shareGroup"]) {
   $(id).addEventListener("input", () => { $(id).value = $(id).value.replace(/\D/g, ""); });
 }
 
+$("gamePick").addEventListener("change", () => { $("placeId").value = $("gamePick").value; });
+$("placeId").addEventListener("input", () => { $("gamePick").value = [...$("gamePick").options].some(o => o.value === $("placeId").value) ? $("placeId").value : ""; });
+
+async function loadGames() {
+  for (const game of await getJSON("games")) {
+    $("gamePick").add(new Option(game.name, game.placeId));
+  }
+}
+
 $("installPlugin").addEventListener("click", async () => {
   const response = await post("plugin/install", {}, "pluginMessage");
   if (response.ok) say(await response.text(), true, "pluginMessage");
@@ -324,7 +336,6 @@ $("cancel").addEventListener("click", () => post("cancel"));
 $("show").addEventListener("click", () => post("show"));
 $("start").addEventListener("click", () => {
   say("");
-  if (!$("placeId").value) return say("Enter the place ID.");
   const picked = kind => [...document.querySelectorAll("input[data-kind=" + kind + "]:checked")].map(i => Number(i.value));
   post("start", { body: JSON.stringify({
     placeId: Number($("placeId").value),
@@ -492,6 +503,7 @@ async function refresh() {
 }
 
 loadAccount();
+loadGames();
 loadSettings();
 refresh();
 setInterval(refresh, 700);

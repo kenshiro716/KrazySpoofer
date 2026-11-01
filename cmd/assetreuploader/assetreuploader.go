@@ -68,9 +68,16 @@ func main() {
 	}
 
 	fmt.Println("localhost started on port " + port + ". Waiting to start reuploading.")
-	if err := serve(c); err != nil {
-		log.Fatal(err)
+	serveFailed := make(chan error, 1)
+	go func() { serveFailed <- serve(c) }()
+
+	if config.Get("open_app") != "false" {
+		if runAppWindow() {
+			return
+		}
+		openAppInBrowser("http://localhost:" + port + "/app")
 	}
+	log.Fatal(<-serveFailed)
 }
 
 // parseCookieFile extracts the Roblox cookie and API key from the cookie file

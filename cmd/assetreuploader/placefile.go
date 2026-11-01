@@ -84,6 +84,15 @@ func placeFileOutputPath(path string) string {
 }
 
 func newRawRequest(c *roblox.Client, job *placeJob, ids []int64) (*request.RawRequest, error) {
+	if job.PlaceID == 0 {
+		return &request.RawRequest{
+			CreatorID:    c.UserInfo.ID,
+			IDs:          ids,
+			ShareUserID:  job.ShareUserID,
+			ShareGroupID: job.ShareGroupID,
+		}, nil
+	}
+
 	details, err := games.MultiGetPlaceDetails(c, []int64{job.PlaceID})
 	if err != nil {
 		return nil, err
@@ -220,6 +229,16 @@ func findProducts(c *roblox.Client, ids []int64, progress func(done, total int))
 
 // runPlaceJob reuploads everything in job and returns the old to new ids.
 func runPlaceJob(c *roblox.Client, job *placeJob, ids []int64) (map[int64]int64, error) {
+	if job.PlaceID == 0 {
+		color.Warn.Println("No game chosen, so assets go to your account and sounds get no game permission.")
+		if len(job.GamePasses) > 0 || len(job.Products) > 0 {
+			color.Warn.Println("Game passes and developer products need a game, so they were skipped.")
+		}
+		noProducts := *job
+		noProducts.GamePasses, noProducts.Products = nil, nil
+		job = &noProducts
+	}
+
 	rawRequest, err := newRawRequest(c, job, ids)
 	if err != nil {
 		return nil, err
@@ -232,8 +251,10 @@ func runPlaceJob(c *roblox.Client, job *placeJob, ids []int64) (map[int64]int64,
 	if err != nil {
 		return nil, err
 	}
-	if err := permissions.CanEditUniverse(context.New(c, resp), req); err != nil {
-		return nil, fmt.Errorf("this account cannot edit that place: %w", err)
+	if job.PlaceID != 0 {
+		if err := permissions.CanEditUniverse(context.New(c, resp), req); err != nil {
+			return nil, fmt.Errorf("this account cannot edit that place: %w", err)
+		}
 	}
 
 	assetTypes := append([]string(nil), job.AssetTypes...)
@@ -319,7 +340,7 @@ func runPlaceFile(c *roblox.Client, path string) error {
 	printAudioQuota(c)
 
 	job := &placeJob{AssetTypes: placeFileAssetTypes}
-	if job.PlaceID, err = promptID("Place id to reupload for: ", true); err != nil {
+	if job.PlaceID, err = promptID("Place id to reupload for (Enter to skip): ", false); err != nil {
 		return err
 	}
 	if job.ShareUserID, err = promptID("Share with user id (Enter to skip): ", false); err != nil {

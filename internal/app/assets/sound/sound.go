@@ -213,6 +213,10 @@ func Reupload(ctx *context.Context, r *request.Request) {
 			NewID: newID,
 		})
 
+		if r.UniverseID == 0 {
+			return
+		}
+
 		if _, err = grantPermissions(newID); err != nil {
 			message := fmt.Sprintf(">> %s(%d) failed to grant permission: ", assetInfo.Name, newID) + err.Error()
 			if pauseController.IsPaused {

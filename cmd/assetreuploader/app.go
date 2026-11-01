@@ -23,6 +23,7 @@ import (
 	"github.com/kenshiro716/KrazySpoofer/internal/app/usage"
 	"github.com/kenshiro716/KrazySpoofer/internal/color"
 	"github.com/kenshiro716/KrazySpoofer/internal/placefile"
+	"github.com/kenshiro716/KrazySpoofer/internal/roblox/games"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
 	"github.com/kenshiro716/KrazySpoofer/internal/roblox/publish"
 )
@@ -242,8 +243,8 @@ func (a *appServer) start(w http.ResponseWriter, r *http.Request) {
 	}
 
 	var body startRequest
-	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.PlaceID <= 0 {
-		writeError(w, "Enter the place id.")
+	if err := json.NewDecoder(r.Body).Decode(&body); err != nil || body.PlaceID < 0 {
+		writeError(w, "That place ID is not valid.")
 		return
 	}
 
@@ -379,6 +380,22 @@ func (a *appServer) account(w http.ResponseWriter, _ *http.Request) {
 	json.NewEncoder(w).Encode(response)
 }
 
+func (a *appServer) games(w http.ResponseWriter, _ *http.Request) {
+	type game struct {
+		Name    string `json:"name"`
+		PlaceID int64  `json:"placeId"`
+	}
+
+	list := make([]game, 0)
+	if response, err := games.UserGames(a.client, a.client.UserInfo.ID); err == nil {
+		for _, item := range response.Data {
+			list = append(list, game{item.Name, item.RootPlace.ID})
+		}
+	}
+	w.Header().Set("Content-Type", "application/json")
+	json.NewEncoder(w).Encode(list)
+}
+
 func (a *appServer) usage(w http.ResponseWriter, _ *http.Request) {
 	response := map[string]any{"today": usage.Get()}
 	if quota, err := publish.GetAudioQuota(a.client); err == nil {
@@ -417,7 +434,8 @@ func (a *appServer) showOutput(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
-func openAppWindow(address string) {
+// openAppInBrowser is the fallback for PCs without the WebView2 runtime.
+func openAppInBrowser(address string) {
 	if runtime.GOOS != "windows" {
 		return
 	}
@@ -434,7 +452,8 @@ func registerApp(c *roblox.Client) {
 	}
 
 	app := &appServer{client: c, token: hex.EncodeToString(tokenBytes)}
-	color.Output = io.MultiWriter(color.Output, app)
+	// The app goes first because the console writer fails once it is detached.
+	color.Output = io.MultiWriter(app, color.Output)
 
 	page := strings.Replace(appPage, "__TOKEN__", app.token, 1)
 	app.handle("GET /app", func(w http.ResponseWriter, _ *http.Request) {
@@ -448,6 +467,7 @@ func registerApp(c *roblox.Client) {
 	app.handle("POST /app/api/open", app.open)
 	app.handle("GET /app/api/account", app.account)
 	app.handle("GET /app/api/usage", app.usage)
+	app.handle("GET /app/api/games", app.games)
 	app.handle("GET /app/api/settings", app.getSettings)
 	app.handle("POST /app/api/settings", app.saveSettings)
 	app.handle("POST /app/api/plugin/install", app.installPlugin)
@@ -461,7 +481,4 @@ func registerApp(c *roblox.Client) {
 		w.WriteHeader(http.StatusOK)
 	})
 
-	if config.Get("open_app") != "false" {
-		go openAppWindow("http://localhost:" + port + "/app")
-	}
 }

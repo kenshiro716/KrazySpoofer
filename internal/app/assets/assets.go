@@ -46,11 +46,13 @@ func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.R
 			return err
 		}
 
-		fmt.Println("Checking if account can edit universe...")
-		err = permissions.CanEditUniverse(ctx, req)
-		console.ClearScreen()
-		if err != nil {
-			clientutils.GetNewCookie(ctx, req, err.Error())
+		if req.UniverseID != 0 {
+			fmt.Println("Checking if account can edit universe...")
+			err = permissions.CanEditUniverse(ctx, req)
+			console.ClearScreen()
+			if err != nil {
+				clientutils.GetNewCookie(ctx, req, err.Error())
+			}
 		}
 
 		reupload(ctx, req)
