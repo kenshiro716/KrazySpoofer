@@ -3,6 +3,7 @@ local AssetIdFilter = require("../AssetIdFilter")
 local getFilterOptions = require("../GetFilterOptions")
 local UiLibrary = require("../../UiLibrary")
 local ApiDump = require("../ApiDump")
+local VersionGate = require("../VersionGate")
 
 local HttpService = game:GetService("HttpService")
 local StudioService = game:GetService("StudioService")
@@ -11,6 +12,12 @@ return function(ui: UiLibrary.Ui, plugin: Plugin)
     local tab = ui:CreateTab("Replace")
 
     local replaceButton = tab:CreateButton("Replace ids", function()
+        local upToDate, versionMessage = VersionGate.check()
+        if not upToDate then
+            ui:Notify("Notification", versionMessage)
+            return
+        end
+
         local file: File? = StudioService:PromptImportFile({"json"} :: any) :: File
         if not file then return end
 

@@ -5,6 +5,7 @@ local Connection = require("./Connection")
 local retry = require("./Retry")
 local StatusCodes = require("./StatusCodes")
 local UiLibrary = require("../UiLibrary")
+local VersionGate = require("./VersionGate")
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local ScriptEditorService = game:GetService("ScriptEditorService")
@@ -91,6 +92,13 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         return 
     end
     busy = true
+
+    local upToDate, versionMessage = VersionGate.check()
+    if not upToDate then
+        ui:Notify("Notification", versionMessage)
+        busy = false
+        return
+    end
 
     if not scriptInjectionEnabled() then
         ui:Notify("Notification", "Plugin needs script injection permission.")
