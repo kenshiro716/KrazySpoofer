@@ -18,18 +18,23 @@ const (
 	shareInterval = time.Second // Stays under the permissions API rate limit.
 )
 
-func newShareBody(userID int64) assets.PermissionRequest {
+type shareTarget struct {
+	subjectType string
+	id          int64
+}
+
+func newShareBody(target shareTarget) assets.PermissionRequest {
 	return assets.PermissionRequest{
 		Requests: []assets.PermissionRequestItem{{
-			SubjectType: "User",
-			SubjectID:   strconv.FormatInt(userID, 10),
+			SubjectType: target.subjectType,
+			SubjectID:   strconv.FormatInt(target.id, 10),
 			Action:      "Use",
 		}},
 	}
 }
 
-func shareAsset(ctx *context.Context, r *request.Request, assetID int64) error {
-	body := newShareBody(r.ShareUserID)
+func shareAsset(ctx *context.Context, r *request.Request, assetID int64, target shareTarget) error {
+	body := newShareBody(target)
 
 	var lastErr error
 	for try := 1; try <= shareTries; try++ {
@@ -63,19 +68,26 @@ func shareAsset(ctx *context.Context, r *request.Request, assetID int64) error {
 	return lastErr
 }
 
-// ShareWithUser gives r.ShareUserID permission to use each asset.
-func ShareWithUser(ctx *context.Context, r *request.Request, assetIDs []int64) {
-	logger := ctx.Logger
-
+// ShareAssets gives the request's share user and group permission to use each asset.
+func ShareAssets(ctx *context.Context, r *request.Request, assetIDs []int64) {
 	if len(assetIDs) == 0 {
 		return
 	}
+
 	if r.ShareUserID == ctx.Client.UserInfo.ID {
-		logger.Warn("Not sharing: the share user id is the logged in account.")
-		return
+		ctx.Logger.Warn("Not sharing with the user id: it is the logged in account.")
+	} else if r.ShareUserID != 0 {
+		shareWithTarget(ctx, r, assetIDs, shareTarget{"User", r.ShareUserID})
 	}
 
-	logger.Println(fmt.Sprintf("Sharing %d assets with user %d...", len(assetIDs), r.ShareUserID))
+	if r.ShareGroupID != 0 {
+		shareWithTarget(ctx, r, assetIDs, shareTarget{"Group", r.ShareGroupID})
+	}
+}
+
+func shareWithTarget(ctx *context.Context, r *request.Request, assetIDs []int64, target shareTarget) {
+	logger := ctx.Logger
+	logger.Println(fmt.Sprintf("Sharing %d assets with %s %d...", len(assetIDs), target.subjectType, target.id))
 
 	shared := 0
 	for i, assetID := range assetIDs {
@@ -83,7 +95,7 @@ func ShareWithUser(ctx *context.Context, r *request.Request, assetIDs []int64) {
 			time.Sleep(shareInterval)
 		}
 
-		if err := shareAsset(ctx, r, assetID); err != nil {
+		if err := shareAsset(ctx, r, assetID, target); err != nil {
 			logger.Error(fmt.Sprintf("[%d/%d] Failed to share %d: %v", i+1, len(assetIDs), assetID, err))
 			continue
 		}
@@ -92,5 +104,5 @@ func ShareWithUser(ctx *context.Context, r *request.Request, assetIDs []int64) {
 		logger.Success(fmt.Sprintf("[%d/%d] Shared %d", i+1, len(assetIDs), assetID))
 	}
 
-	logger.Println(fmt.Sprintf("Shared %d/%d assets with user %d.", shared, len(assetIDs), r.ShareUserID))
+	logger.Println(fmt.Sprintf("Shared %d/%d assets with %s %d.", shared, len(assetIDs), target.subjectType, target.id))
 }

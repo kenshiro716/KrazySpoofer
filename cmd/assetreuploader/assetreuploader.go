@@ -59,6 +59,14 @@ func main() {
 	
 	ensureAPIKey()
 
+	if path := placeFileArgument(); path != "" {
+		if err := runPlaceFile(c, path); err != nil {
+			color.Error.Println(err)
+		}
+		console.Input("Press Enter to close.")
+		return
+	}
+
 	fmt.Println("localhost started on port " + port + ". Waiting to start reuploading.")
 	if err := serve(c); err != nil {
 		log.Fatal(err)

@@ -51,7 +51,8 @@ type Request = {
 	exportJson: boolean,     
 	isGroup: boolean,
 	products: { findDeveloperProducts.ProductInfo }?,
-	shareUserId: number?
+	shareUserId: number?,
+	shareGroupId: number?
 }
 
 local function scriptInjectionEnabled()
@@ -191,6 +192,7 @@ return function(plugin: Plugin, ui: UiLibrary.Ui, filterOptions: AssetIdFilter.F
         exportJson = plugin:GetSetting("ExportJSON"),
         products = products,
         shareUserId = plugin:GetSetting("ShareUserId"),
+        shareGroupId = plugin:GetSetting("ShareGroupId"),
     }
     
     local success, statusCode = connection:Send("/reupload", HttpService:JSONEncode(request))

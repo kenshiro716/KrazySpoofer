@@ -59,6 +59,13 @@ func (r *Response) TakeNewIDs() []int64 {
 	return ids
 }
 
+// Items returns a copy of the items waiting to be sent.
+func (r *Response) Items() []ResponseItem {
+	r.mutex.RLock()
+	defer r.mutex.RUnlock()
+	return append([]ResponseItem(nil), r.cache...)
+}
+
 func (r *Response) Clear() {
 	r.mutex.Lock()
 	r.cache = make([]ResponseItem, 0)

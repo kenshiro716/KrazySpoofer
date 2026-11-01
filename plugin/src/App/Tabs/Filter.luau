@@ -3,10 +3,8 @@ local UiLibrary = require("../../UiLibrary")
 
 local MarketplaceService = game:GetService("MarketplaceService")
 local Players = game:GetService("Players")
+local GroupService = game:GetService("GroupService")
 
-local function sharePlaceholder(label: string?): string
-    return if label then `Sharing with {label}` else "Share with user id"
-end
 
 return function(ui: UiLibrary.Ui, plugin: Plugin)
 	local tab = ui:CreateTab("Filter")
@@ -34,37 +32,50 @@ return function(ui: UiLibrary.Ui, plugin: Plugin)
         plugin:SetSetting("NumVals", state)
     end, plugin:GetSetting("NumVals"))
 
-    local savedShareUserId = plugin:GetSetting("ShareUserId")
-    local shareInput; shareInput = split2:CreateInput(sharePlaceholder(if savedShareUserId and savedShareUserId ~= 0 then tostring(savedShareUserId) else nil), function(input)
-        local userId = tonumber(input)
-        if not userId then return end
-
-        local shareTextBox = shareInput.instance.TextBox
-        if userId == 0 then
-            plugin:SetSetting("ShareUserId", 0)
-            shareTextBox.PlaceholderText = sharePlaceholder()
-            ui:Notify("Notification", "Sharing turned off.")
-            return
+    local function createShareInput(parent: any, settingName: string, placeholder: string, tip: string, getName: (id: number) -> string)
+        local function getPlaceholder(label: string?): string
+            return if label then `Sharing with {label}` else placeholder
         end
 
-        local success, username = pcall(Players.GetNameFromUserIdAsync, Players, userId)
-        if not success then
-            ui:Notify("Notification", "Couldn't find a user with that id.")
-            return
-        end
+        local savedId = plugin:GetSetting(settingName)
+        local input; input = parent:CreateInput(getPlaceholder(if savedId and savedId ~= 0 then tostring(savedId) else nil), function(text)
+            local id = tonumber(text)
+            if not id then return end
 
-        plugin:SetSetting("ShareUserId", userId)
-        shareTextBox.PlaceholderText = sharePlaceholder(username)
-        ui:Notify("Notification", `Reuploads will be shared with {username}. They must be your friend.`)
-    end)
-    shareInput:AddTip(ui:CreateTip(
-        "Shares reuploaded animations, sounds and meshes with this user. They must be your friend. Enter 0 to turn it off."
-    ))
+            local textBox = input.instance.TextBox
+            if id == 0 then
+                plugin:SetSetting(settingName, 0)
+                textBox.PlaceholderText = getPlaceholder()
+                ui:Notify("Notification", "Sharing turned off.")
+                return
+            end
 
-    local shareTextBox = shareInput.instance.TextBox
-    shareTextBox:GetPropertyChangedSignal("Text"):Connect(function()
-        shareTextBox.Text = string.gsub(shareTextBox.Text, "%D", "")
-    end)
+            local success, name = pcall(getName, id)
+            if not success then
+                ui:Notify("Notification", "Couldn't find that id.")
+                return
+            end
+
+            plugin:SetSetting(settingName, id)
+            textBox.PlaceholderText = getPlaceholder(name)
+            ui:Notify("Notification", `Reuploads will be shared with {name}.`)
+        end)
+        input:AddTip(ui:CreateTip(tip))
+
+        local textBox = input.instance.TextBox
+        textBox:GetPropertyChangedSignal("Text"):Connect(function()
+            textBox.Text = string.gsub(textBox.Text, "%D", "")
+        end)
+    end
+
+    createShareInput(split2, "ShareUserId", "Share with user id",
+        "Shares reuploaded animations, sounds and meshes with this user. They must be your friend. Enter 0 to turn it off.",
+        function(id) return Players:GetNameFromUserIdAsync(id) end)
+
+    local split3 = tab:CreateSplit()
+    createShareInput(split3, "ShareGroupId", "Share with group id",
+        "Shares reuploaded animations, sounds and meshes with this group. Enter 0 to turn it off.",
+        function(id) return GroupService:GetGroupInfoAsync(id).Name end)
 
     placeList = tab:CreateList()
 

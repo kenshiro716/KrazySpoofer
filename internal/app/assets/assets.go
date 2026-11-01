@@ -55,8 +55,8 @@ func NewReuploadHandlerWithType(assetType string, c *roblox.Client, r *request.R
 
 		// Developer products are not assets, so they have no permissions to share.
 		newIDs := resp.TakeNewIDs()
-		if req.ShareUserID != 0 && assetType != "DeveloperProduct" {
-			assetutils.ShareWithUser(ctx, req, newIDs)
+		if assetType != "DeveloperProduct" {
+			assetutils.ShareAssets(ctx, req, newIDs)
 		}
 		return nil
 	}, nil

@@ -40,6 +40,44 @@ type PlaceDetailsResponse struct {
 	} `json:"fiatPurchaseData"`
 }
 
+// UniverseCreator returns who owns a universe and whether that owner is a group.
+func UniverseCreator(c *roblox.Client, universeID int64) (int64, bool, error) {
+	url := fmt.Sprintf("https://games.roblox.com/v1/games?universeIds=%d", universeID)
+	req, err := http.NewRequest("GET", url, http.NoBody)
+	if err != nil {
+		return 0, false, err
+	}
+	req.AddCookie(&http.Cookie{Name: ".ROBLOSECURITY", Value: c.Cookie})
+
+	resp, err := c.DoRequest(req)
+	if err != nil {
+		return 0, false, err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		return 0, false, errors.New(resp.Status)
+	}
+
+	var body struct {
+		Data []struct {
+			Creator struct {
+				ID   int64  `json:"id"`
+				Type string `json:"type"`
+			} `json:"creator"`
+		} `json:"data"`
+	}
+	if err := json.NewDecoder(resp.Body).Decode(&body); err != nil {
+		return 0, false, err
+	}
+	if len(body.Data) == 0 {
+		return 0, false, errors.New("universe not found")
+	}
+
+	creator := body.Data[0].Creator
+	return creator.ID, creator.Type == "Group", nil
+}
+
 func newMultiGetPlaceURL(placeIDs []int64) string {
 	strIDs := make([]string, len(placeIDs))
 	for i, id := range placeIDs {

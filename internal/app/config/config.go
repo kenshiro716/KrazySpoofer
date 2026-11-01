@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 	"os"
+	"path/filepath"
 	"sort"
 	"strings"
 
@@ -21,7 +22,31 @@ var (
 	}
 )
 
+var startDirectory, _ = os.Getwd()
+
+// HasPlaceFileArgument reports whether a place file was dropped on the executable.
+func HasPlaceFileArgument() bool {
+	if len(os.Args) < 2 {
+		return false
+	}
+	extension := strings.ToLower(filepath.Ext(os.Args[1]))
+	return extension == ".rbxl" || extension == ".rbxlx"
+}
+
+// StartDirectory is the working directory the executable was launched from.
+func StartDirectory() string {
+	return startDirectory
+}
+
 func init() {
+	// Dropping a file can start the executable in another folder, so move back
+	// to where config.ini and cookie.txt live.
+	if HasPlaceFileArgument() {
+		if executable, err := os.Executable(); err == nil {
+			_ = os.Chdir(filepath.Dir(executable))
+		}
+	}
+
 	contents, err := files.Read("config.ini")
 	if err != nil && !os.IsNotExist(err) {
 		log.Printf("failed reading config.ini, using defaults: %v", err)

@@ -27,7 +27,8 @@ type RawRequest struct {
 
 	Products []ProductInfo `json:"products"`
 
-	ShareUserID int64 `json:"shareUserId"`
+	ShareUserID  int64 `json:"shareUserId"`
+	ShareGroupID int64 `json:"shareGroupId"`
 }
 
 type Request struct {
@@ -39,6 +40,7 @@ type Request struct {
 	IsGroup         bool
 	Products        []ProductInfo
 	ShareUserID     int64
+	ShareGroupID    int64
 }
 
 func FromRawRequest(c *roblox.Client, req *RawRequest) (*Request, error) {
@@ -58,5 +60,6 @@ func FromRawRequest(c *roblox.Client, req *RawRequest) (*Request, error) {
 		IsGroup:         req.IsGroup,
 		Products:        req.Products,
 		ShareUserID:     req.ShareUserID,
+		ShareGroupID:    req.ShareGroupID,
 	}, nil
 }
