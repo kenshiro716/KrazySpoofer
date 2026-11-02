@@ -3,11 +3,11 @@ package permissions
 import (
 	"errors"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/groups"
+	"krazyspoofer/internal/app/context"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/roblox/develop"
+	"krazyspoofer/internal/roblox/groups"
 )
 
 var (

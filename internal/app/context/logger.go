@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"io"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/color"
+	"krazyspoofer/internal/color"
 )
 
 type logger struct {

@@ -8,7 +8,7 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/roblox"
 )
 
 var UploadAudioErrors = struct {

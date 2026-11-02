@@ -1,8 +1,8 @@
 package request
 
 import (
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/games"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/roblox/games"
 )
 
 // ProductInfo describes a developer product read by the plugin with

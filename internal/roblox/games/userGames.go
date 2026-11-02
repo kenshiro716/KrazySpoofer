@@ -6,8 +6,8 @@ import (
 	"fmt"
 	"net/http"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/retry"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/retry"
+	"krazyspoofer/internal/roblox"
 )
 
 func NewUserGamesHandler(c *roblox.Client, userID int64) (func() (*GamesResponse, error), error) {

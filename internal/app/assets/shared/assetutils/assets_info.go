@@ -7,13 +7,13 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/clientutils"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/retry"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
-	"github.com/kenshiro716/KrazySpoofer/internal/taskqueue"
+	"krazyspoofer/internal/app/assets/shared/clientutils"
+	"krazyspoofer/internal/app/context"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/retry"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/roblox/develop"
+	"krazyspoofer/internal/taskqueue"
 )
 
 const AssetsInfoChunkSize int = 50

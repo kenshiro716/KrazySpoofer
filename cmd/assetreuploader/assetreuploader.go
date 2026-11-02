@@ -6,12 +6,12 @@ import (
 	"os"
 	"strings"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
-	"github.com/kenshiro716/KrazySpoofer/internal/color"
-	"github.com/kenshiro716/KrazySpoofer/internal/console"
-	"github.com/kenshiro716/KrazySpoofer/internal/files"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/update"
+	"krazyspoofer/internal/app/config"
+	"krazyspoofer/internal/color"
+	"krazyspoofer/internal/console"
+	"krazyspoofer/internal/files"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/update"
 )
 
 var (

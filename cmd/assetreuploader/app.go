@@ -19,17 +19,17 @@ import (
 	"sync/atomic"
 	"time"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/assetutils"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/settings"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/usage"
-	"github.com/kenshiro716/KrazySpoofer/internal/color"
-	"github.com/kenshiro716/KrazySpoofer/internal/placefile"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/games"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/publish"
-	"github.com/kenshiro716/KrazySpoofer/internal/update"
+	"krazyspoofer/internal/app/assets/shared/assetutils"
+	"krazyspoofer/internal/app/config"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/app/settings"
+	"krazyspoofer/internal/app/usage"
+	"krazyspoofer/internal/color"
+	"krazyspoofer/internal/placefile"
+	"krazyspoofer/internal/roblox/games"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/roblox/publish"
+	"krazyspoofer/internal/update"
 )
 
 //go:embed app.html

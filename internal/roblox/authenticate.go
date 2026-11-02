@@ -5,7 +5,7 @@ import (
 	"errors"
 	"net/http"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/retry"
+	"krazyspoofer/internal/retry"
 )
 
 var AuthenticateErrors = struct {

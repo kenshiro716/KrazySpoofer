@@ -10,8 +10,8 @@ import (
 	"net/url"
 	"strconv"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/developerproducts"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/roblox/developerproducts"
 )
 
 const baseURL = "https://apis.roblox.com/game-passes/v1/universes/"

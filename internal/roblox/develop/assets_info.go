@@ -9,7 +9,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/roblox"
 )
 
 type AssetInfo struct {

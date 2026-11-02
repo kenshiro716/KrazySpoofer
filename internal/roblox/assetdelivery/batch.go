@@ -7,7 +7,7 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/roblox"
 )
 
 var ErrBodyTooLarge = errors.New("batch request body is too large")

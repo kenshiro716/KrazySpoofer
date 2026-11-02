@@ -8,8 +8,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/retry"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/retry"
+	"krazyspoofer/internal/roblox"
 )
 
 var MultiGetPlaceDetailsErrors = struct {

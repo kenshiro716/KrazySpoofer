@@ -9,7 +9,7 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/files"
+	"krazyspoofer/internal/files"
 )
 
 var (

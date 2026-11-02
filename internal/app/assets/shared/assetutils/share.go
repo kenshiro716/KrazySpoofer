@@ -7,10 +7,10 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/clientutils"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/assets"
+	"krazyspoofer/internal/app/assets/shared/clientutils"
+	"krazyspoofer/internal/app/context"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/roblox/assets"
 )
 
 const (

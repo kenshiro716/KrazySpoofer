@@ -7,7 +7,7 @@ import (
 	"sync"
 	"time"
 
-	_ "github.com/kenshiro716/KrazySpoofer/internal/app/config" // Moves to the exe folder first.
+	_ "krazyspoofer/internal/app/config" // Moves to the exe folder first.
 )
 
 const usageFile = "krazyspoofer-usage.json"

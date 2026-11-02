@@ -3,7 +3,7 @@ package assetutils
 import (
 	"strconv"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/assets"
+	"krazyspoofer/internal/roblox/assets"
 )
 
 func NewPermissionBodyFromIds(universeIDs []int64) assets.PermissionRequest {

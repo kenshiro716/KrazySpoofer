@@ -7,14 +7,14 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/assets"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/assetutils"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
-	"github.com/kenshiro716/KrazySpoofer/internal/color"
-	"github.com/kenshiro716/KrazySpoofer/internal/files"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
-	"github.com/kenshiro716/KrazySpoofer/internal/update"
+	"krazyspoofer/internal/app/assets"
+	"krazyspoofer/internal/app/assets/shared/assetutils"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/app/response"
+	"krazyspoofer/internal/color"
+	"krazyspoofer/internal/files"
+	"krazyspoofer/internal/roblox"
+	"krazyspoofer/internal/update"
 )
 
 var CompatiblePluginVersion = ""

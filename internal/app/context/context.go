@@ -1,8 +1,8 @@
 package context
 
 import (
-	"github.com/kenshiro716/KrazySpoofer/internal/app/response"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/app/response"
+	"krazyspoofer/internal/roblox"
 )
 
 type Context struct {

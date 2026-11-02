@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/app/config"
+	"krazyspoofer/internal/roblox"
 )
 
 var baseURL = "https://apis.roblox.com/developer-products/v2/universes/"

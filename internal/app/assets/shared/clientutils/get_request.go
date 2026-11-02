@@ -6,8 +6,8 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/retry"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/retry"
+	"krazyspoofer/internal/roblox"
 )
 
 func GetRequest(c *roblox.Client, url string) (*bytes.Buffer, error) {

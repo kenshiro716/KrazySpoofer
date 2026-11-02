@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"errors"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox"
+	"krazyspoofer/internal/roblox"
 )
 
 var UploadMeshErrors = struct {

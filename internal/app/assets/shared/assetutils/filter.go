@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"slices"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/settings"
-	"github.com/kenshiro716/KrazySpoofer/internal/roblox/develop"
+	"krazyspoofer/internal/app/context"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/app/settings"
+	"krazyspoofer/internal/roblox/develop"
 )
 
 const creatorTypeGroup = "Group"

@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	_ "github.com/kenshiro716/KrazySpoofer/internal/app/config" // Moves to the exe folder first.
+	_ "krazyspoofer/internal/app/config" // Moves to the exe folder first.
 )
 
 const settingsFile = "krazyspoofer-settings.json"

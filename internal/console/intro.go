@@ -8,7 +8,7 @@ import (
 
 	"github.com/mattn/go-isatty"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/color"
+	"krazyspoofer/internal/color"
 )
 
 const introSubtitle = "Asset Reuploader  -  Uploaderv3Newest"

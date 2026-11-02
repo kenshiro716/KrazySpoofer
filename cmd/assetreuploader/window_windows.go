@@ -14,7 +14,7 @@ import (
 	webview2 "github.com/jchv/go-webview2"
 	"golang.org/x/sys/windows"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/console"
+	"krazyspoofer/internal/console"
 )
 
 const (

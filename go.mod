@@ -1,4 +1,4 @@
-module github.com/kenshiro716/KrazySpoofer
+module krazyspoofer
 
 go 1.23.3
 

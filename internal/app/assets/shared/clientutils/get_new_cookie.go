@@ -4,13 +4,13 @@ import (
 	"errors"
 	"fmt"
 
-	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/permissions"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/context"
-	"github.com/kenshiro716/KrazySpoofer/internal/app/request"
-	"github.com/kenshiro716/KrazySpoofer/internal/color"
-	"github.com/kenshiro716/KrazySpoofer/internal/console"
-	"github.com/kenshiro716/KrazySpoofer/internal/files"
+	"krazyspoofer/internal/app/assets/shared/permissions"
+	"krazyspoofer/internal/app/config"
+	"krazyspoofer/internal/app/context"
+	"krazyspoofer/internal/app/request"
+	"krazyspoofer/internal/color"
+	"krazyspoofer/internal/console"
+	"krazyspoofer/internal/files"
 )
 
 var cookieFile = config.Get("cookie_file")
