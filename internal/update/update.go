@@ -12,7 +12,7 @@ import (
 // the new executable, then raise "build" in latest-app.json to the same number.
 const Build = 1
 
-var latestURL = "https://raw.githubusercontent.com/kenshiro716/KrazySpoofer/main/latest-app.json"
+var latestURL = "https://ks-update.dylanm20122.workers.dev/app"
 
 const (
 	checkTimeout = 10 * time.Second
