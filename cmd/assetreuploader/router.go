@@ -49,6 +49,7 @@ func serve(c *roblox.Client) error {
 	})
 
 	http.HandleFunc("GET /", func(w http.ResponseWriter, r *http.Request) {
+		lastPluginPoll.Store(time.Now().Unix())
 		w.WriteHeader(http.StatusOK)
 		if resp.Len() == 0 && !busy {
 			if !finished {

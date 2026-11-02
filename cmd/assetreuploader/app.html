@@ -7,42 +7,42 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <style>
 :root {
-  --bg: #0f0f12; --side: #17171b; --card: #1a1a1f; --card2: #222228; --line: #2e2e36;
-  --accent: #6366f1; --accent2: #4f46e5; --accent3: #4338ca;
-  --text: #f4f4f6; --dim: #a1a1aa; --faint: #71717a;
+  --bg: #0e0e11; --side: #15151a; --card: #18181d; --inner: #1d1d23; --field: #16161b; --line: #2b2b33;
+  --accent: #6366f1; --accent-dark: #4338ca; --accent-soft: #3f3a9e;
+  --text: #f5f5f7; --dim: #a1a1aa; --faint: #71717a;
   --good: #4ade80; --warn: #fbbf24; --bad: #f87171; --info: #60a5fa;
 }
 * { box-sizing: border-box; }
 html, body { height: 100%; }
-body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "Segoe UI", system-ui, sans-serif; display: flex; overflow: hidden; }
+body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Inter, "Segoe UI", system-ui, sans-serif; display: flex; overflow: hidden; }
 
-aside { width: 280px; flex: none; background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
-.brand { display: flex; gap: 12px; align-items: center; padding: 22px 20px; border-bottom: 1px solid var(--line); }
-.brand img { width: 56px; height: 56px; border-radius: 50%; }
-.brand b { font-size: 21px; line-height: 1.15; }
-.nav-label { padding: 22px 20px 8px; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: var(--faint); text-transform: uppercase; }
-nav button { display: flex; width: 100%; align-items: center; gap: 12px; border: 0; background: none; color: var(--dim); font: inherit; font-weight: 600; padding: 14px 20px; cursor: pointer; text-align: left; text-decoration: none; }
-nav a { display: flex; align-items: center; gap: 12px; color: var(--dim); font-weight: 600; padding: 14px 20px; text-decoration: none; }
-nav button:hover, nav a:hover { color: var(--text); background: var(--card); }
-nav button.active { background: var(--accent); color: #fff; }
-nav svg { width: 19px; height: 19px; flex: none; }
-.me { margin-top: auto; padding: 16px 20px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
-.me img { width: 46px; height: 46px; border-radius: 50%; background: var(--accent); flex: none; }
-.me b { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.me small { color: var(--dim); }
+aside { width: 240px; flex: none; background: var(--side); border-right: 1px solid var(--line); display: flex; flex-direction: column; }
+.brand { display: flex; gap: 12px; align-items: center; padding: 20px 16px; border-bottom: 1px solid var(--line); }
+.brand img { width: 50px; height: 50px; border-radius: 50%; }
+.brand b { font-size: 19px; line-height: 1.2; }
+.nav-label { padding: 18px 18px 8px; font-size: 12px; font-weight: 600; letter-spacing: .6px; color: var(--faint); text-transform: uppercase; }
+.nav-item { display: flex; width: 100%; align-items: center; gap: 12px; border: 0; background: none; color: var(--dim); font: inherit; font-weight: 600; padding: 12px 18px; cursor: pointer; text-align: left; text-decoration: none; }
+.nav-item:hover { color: var(--text); background: var(--card); }
+.nav-item.active { background: var(--accent); color: #fff; }
+.nav-item .emoji { width: 22px; text-align: center; flex: none; }
+.badge { margin-left: auto; min-width: 22px; padding: 0 7px; border-radius: 11px; background: var(--accent); color: #fff; font-size: 12px; text-align: center; }
+.me { margin-top: auto; padding: 14px 16px; border-top: 1px solid var(--line); display: flex; align-items: center; gap: 12px; min-width: 0; }
+.me img { width: 42px; height: 42px; border-radius: 50%; background: var(--accent); flex: none; }
 .me div { min-width: 0; }
+.me b { display: block; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.me small { color: var(--dim); }
 
 main { flex: 1; min-width: 0; overflow: auto; }
-.top { padding: 28px 44px; border-bottom: 1px solid var(--line); }
-.top h1 { margin: 0; font-size: 36px; line-height: 1.2; }
-.top p { margin: 2px 0 0; color: var(--dim); font-size: 17px; }
-.page { padding: 32px 44px 48px; max-width: 1300px; display: none; }
+.top { padding: 26px 36px; border-bottom: 1px solid var(--line); }
+.top h1 { margin: 0; font-size: 34px; line-height: 1.2; }
+.top p { margin: 4px 0 0; color: var(--dim); font-size: 16px; }
+.page { padding: 28px 36px 44px; max-width: 1240px; display: none; }
 .page.active { display: block; }
-h2 { font-size: 26px; margin: 0; }
-.sub { color: var(--dim); margin: 2px 0 20px; }
+h2 { font-size: 25px; margin: 0; line-height: 1.3; }
+.sub { color: var(--dim); margin: 2px 0 18px; }
 
-.tabs { display: flex; background: var(--accent3); border-radius: 12px; padding: 5px; margin-bottom: 26px; }
-.tabs button { flex: 1; border: 0; border-radius: 9px; background: none; color: #fff; font: inherit; font-weight: 600; padding: 13px; cursor: pointer; }
+.tabs { display: flex; background: var(--accent-dark); border-radius: 12px; padding: 5px; margin-bottom: 26px; }
+.tabs button { flex: 1; border: 0; border-radius: 9px; background: none; color: #fff; font: inherit; font-weight: 600; padding: 12px; cursor: pointer; }
 .tabs button.active { background: var(--accent); }
 .tabpage { display: none; }
 .tabpage.active { display: block; }
@@ -50,74 +50,110 @@ h2 { font-size: 26px; margin: 0; }
 .card { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 22px; margin-bottom: 18px; }
 .card h3 { margin: 0 0 4px; font-size: 20px; }
 .card > p { margin: 0 0 16px; color: var(--dim); }
-.steps { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; }
-.step { background: var(--card2); border: 1px solid var(--line); border-radius: 10px; padding: 18px; display: flex; flex-direction: column; gap: 6px; }
-.step b { font-size: 17px; }
-.step p { margin: 0 0 12px; color: var(--dim); flex: 1; }
+.steps { display: grid; grid-template-columns: 1fr 1px 2fr; gap: 14px; }
+.divider { background: var(--accent-soft); }
+.steps-right { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.step { background: var(--inner); border: 1px solid var(--line); border-radius: 10px; padding: 16px; display: grid; grid-template-columns: 34px 1fr; gap: 12px; align-content: start; }
+.step.wide { margin-top: 14px; }
+.num { width: 34px; height: 34px; border-radius: 9px; background: var(--accent-dark); display: grid; place-items: center; font-weight: 700; }
+.step b { display: block; font-size: 16px; }
+.step p { margin: 2px 0 12px; color: var(--dim); font-size: 14px; }
+.step.wide p { margin-bottom: 0; }
+.big { display: grid; justify-items: center; align-content: center; gap: 8px; width: 100%; min-height: 104px; padding: 12px; border-radius: 10px; font: inherit; font-weight: 600; cursor: pointer; color: var(--text); text-decoration: none; text-align: center; overflow-wrap: anywhere; }
+.big .emoji { font-size: 22px; line-height: 1; }
+.big.dark { background: #26262c; border: 1px solid var(--line); }
+.big.blue { background: var(--accent); border: 1px solid var(--accent); }
+.big.file { background: none; border: 2px dashed var(--line); }
+.big:hover { border-color: var(--accent); }
 
-button.btn { background: var(--card2); color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 12px 18px; font: inherit; font-weight: 600; cursor: pointer; }
+.status { display: flex; gap: 14px; align-items: center; border: 1px solid var(--line); border-radius: 10px; padding: 14px 18px; background: var(--inner); }
+.dot { width: 12px; height: 12px; border-radius: 50%; background: var(--faint); flex: none; }
+.dot.on { background: var(--good); }
+.status b { display: block; font-size: 16px; }
+.status small { color: var(--dim); font-size: 14px; }
+
+button.btn { background: #26262c; color: var(--text); border: 1px solid var(--line); border-radius: 8px; padding: 11px 18px; font: inherit; font-weight: 600; cursor: pointer; }
 button.btn:hover:not(:disabled) { border-color: var(--accent); }
 button.primary { background: var(--accent); border-color: var(--accent); color: #fff; }
-button.primary:hover:not(:disabled) { background: var(--accent2); }
-button.btn:disabled { opacity: .45; cursor: default; }
+button.wide { display: block; width: 100%; padding: 14px; }
+button.btn:disabled { background: var(--accent-soft); border-color: var(--accent-soft); color: #9c9cb0; cursor: default; }
 
-.drop { display: block; border: 2px dashed var(--line); border-radius: 10px; padding: 34px; text-align: center; color: var(--dim); cursor: pointer; }
-.drop.over, .drop:hover { border-color: var(--accent); color: var(--text); }
+.drop { display: grid; justify-items: center; gap: 2px; border: 2px dashed var(--accent); border-radius: 12px; padding: 22px; text-align: center; color: var(--dim); cursor: pointer; font-size: 17px; }
+.drop.over, .drop:hover { background: #1c1c28; }
 .drop input { display: none; }
+.drop .folder { font-size: 40px; line-height: 1.1; }
+.drop u { color: var(--accent); }
+.drop small { color: var(--dim); font-size: 13px; }
 #summary { margin-top: 10px; color: var(--dim); min-height: 22px; }
+h4 { margin: 18px 0 8px; font-size: 18px; }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip-groups { display: flex; flex-wrap: wrap; gap: 28px; }
+.chip-groups small { display: block; font-weight: 600; margin-bottom: 6px; color: var(--dim); }
+.chip { background: var(--card); border: 1px solid var(--line); border-radius: 8px; color: var(--text); font: inherit; font-size: 14px; font-weight: 600; padding: 7px 14px; cursor: pointer; }
+.chip.active { background: var(--accent); border-color: var(--accent); }
 .fields { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 14px; }
-label.field { display: grid; gap: 6px; font-weight: 600; }
+label.field { display: grid; gap: 6px; font-weight: 600; align-content: start; }
 label.field small { color: var(--dim); font-weight: 400; }
-input[type=text], textarea, select { width: 100%; background: #16161a; border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 10px 12px; font: inherit; }
-textarea { min-height: 110px; resize: vertical; font-family: Consolas, monospace; font-size: 14px; }
-input[type=text]:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); }
-.checks { display: flex; flex-wrap: wrap; gap: 20px; margin-top: 16px; }
-.check { display: flex; gap: 10px; align-items: center; cursor: pointer; }
+input[type=text], input[type=password], textarea, select { width: 100%; background: var(--field); border: 1px solid var(--line); border-radius: 8px; color: var(--text); padding: 9px 12px; font: inherit; }
+textarea { min-height: 120px; resize: vertical; font-family: Consolas, monospace; font-size: 14px; }
+input:focus, textarea:focus, select:focus { outline: 1px solid var(--accent); }
 input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
-.actions { display: flex; flex-wrap: wrap; gap: 10px; }
-.bar { height: 10px; background: var(--card2); border-radius: 5px; overflow: hidden; margin-top: 16px; }
+.bar { height: 10px; background: #20202a; border-radius: 5px; overflow: hidden; margin-top: 8px; }
 .bar div { height: 100%; width: 0; background: var(--accent); transition: width .2s; }
 .message { min-height: 22px; margin-top: 10px; color: var(--bad); }
 .message.ok { color: var(--good); }
 .items { display: grid; gap: 2px; max-height: 260px; overflow: auto; }
 .items label { display: flex; gap: 10px; padding: 7px 8px; border-radius: 6px; cursor: pointer; overflow-wrap: anywhere; }
-.items label:hover { background: var(--card2); }
+.items label:hover { background: var(--inner); }
 .items small { color: var(--dim); }
 
-.account { display: flex; align-items: center; gap: 24px; background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 16px 24px; margin-bottom: 28px; flex-wrap: wrap; }
-.account img { width: 96px; height: 96px; border-radius: 50%; background: var(--accent); }
-.account div { flex: 1; min-width: 160px; }
-.account small { display: block; color: var(--dim); font-weight: 600; }
-.tag { border: 1px solid; border-radius: 6px; padding: 3px 10px; font-size: 13px; font-weight: 600; }
-.tag.on { color: var(--good); background: #0f2a1b; }
-.tag.off { color: var(--warn); background: #33280c; }
+.table-head, .row { display: grid; grid-template-columns: 200px 1fr 1fr 1fr; align-items: center; gap: 16px; }
+.table-head { padding: 0 16px 8px; color: var(--dim); font-weight: 600; font-size: 14px; }
+.row { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; margin-bottom: 26px; }
+.row img { width: 84px; height: 84px; border-radius: 50%; background: var(--accent); margin: 0 auto; display: block; }
+.tag { border: 1px solid; border-radius: 6px; padding: 2px 10px; font-size: 13px; font-weight: 600; justify-self: start; }
+.tag.on { color: var(--warn); background: #33280c; }
+.tag.off { color: var(--dim); background: var(--inner); }
+.tag.good { color: var(--good); background: #0f2a1b; }
+hr { border: 0; border-top: 1px solid var(--line); margin: 0 0 22px; }
 
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin-bottom: 20px; }
-.stat { border: 1px solid var(--accent); border-radius: 12px; padding: 18px 20px; }
-.stat small { color: var(--dim); font-size: 15px; }
-.stat b { display: block; font-size: 34px; line-height: 1.3; }
-.usage { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; font-size: 17px; margin-top: 14px; }
-.usage span { color: var(--dim); font-weight: 400; font-size: 15px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 14px; margin-bottom: 16px; }
+.stat { border: 1px solid var(--accent); border-radius: 12px; padding: 14px 18px; }
+.stat small { color: var(--dim); font-size: 14px; }
+.stat b { display: block; font-size: 30px; line-height: 1.3; }
+.usage { margin-top: 16px; }
+.usage > div:first-child { display: flex; justify-content: space-between; gap: 10px; font-weight: 600; }
+.usage span { color: var(--dim); font-weight: 400; font-size: 14px; }
 
-.setting { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; font-size: 17px; cursor: pointer; }
-.config-field { margin-top: 18px; }
-.config-field b { display: block; font-size: 17px; }
+.setting { display: flex; gap: 12px; align-items: center; margin-bottom: 10px; font-size: 16px; cursor: pointer; }
+.config-field { margin-top: 16px; max-width: 900px; }
+.config-field b { display: block; font-size: 16px; }
 .config-field small { display: block; color: var(--dim); margin-bottom: 6px; font-size: 14px; }
 
-#log { margin: 0; height: 460px; overflow: auto; background: #0b0b0e; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font: 13px/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
+#log { margin: 0; height: 460px; overflow: auto; background: #0a0a0d; border: 1px solid var(--line); border-radius: 8px; padding: 12px; font: 13px/1.5 Consolas, monospace; white-space: pre-wrap; overflow-wrap: anywhere; }
 .c31 { color: var(--bad); } .c32 { color: var(--good); } .c33 { color: var(--warn); } .c34 { color: var(--info); }
+
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.6); display: grid; place-items: center; padding: 16px; z-index: 10; }
+.modal { width: 100%; max-width: 500px; background: #1e1e24; border: 1px solid var(--line); border-radius: 14px; padding: 22px; }
+.modal h3 { margin: 0 0 12px; font-size: 21px; }
+.modal p { margin: 0 0 10px; }
+.modal ol { margin: 0 0 14px; padding-left: 20px; }
+.modal .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
 [hidden] { display: none !important; }
 
-@media (max-width: 760px) {
-  aside { width: 72px; }
-  .brand b, .brand { font-size: 0; padding: 14px 10px; justify-content: center; }
-  .brand img { width: 44px; height: 44px; }
-  .nav-label { display: none; }
-  nav button, nav a { font-size: 0; justify-content: center; padding: 14px 0; gap: 0; }
-  .me { justify-content: center; padding: 12px 0; }
-  .me div { display: none; }
+@media (max-width: 860px) {
+  aside { width: 66px; }
+  .brand { padding: 12px 8px; justify-content: center; }
+  .brand b, .nav-label, .nav-text, .me div { display: none; }
+  .nav-item { justify-content: center; padding: 12px 0; }
+  .badge { display: none; }
+  .me { justify-content: center; padding: 10px 0; }
   .top, .page { padding-left: 16px; padding-right: 16px; }
-  .top h1 { font-size: 28px; }
+  .steps { grid-template-columns: 1fr; }
+  .divider { display: none; }
+  .steps-right { grid-template-columns: 1fr; }
+  .table-head { display: none; }
+  .row { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -125,17 +161,15 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
 <aside>
   <div class="brand"><img src="/app/icon.png" alt=""><b>Krazy<br>Spoofer</b></div>
   <div class="nav-label">Dashboard</div>
-  <nav>
-    <button data-page="assets" class="active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 15V4m0 0L7 9m5-5 5 5M4 15v4a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-4"/></svg>Manage Assets</button>
-    <button data-page="accounts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21c0-4 4-6 8-6s8 2 8 6"/></svg>Manage Account</button>
-    <button data-page="usage"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 20V10m7 10V4m7 16v-7"/></svg>Daily Usage</button>
-    <button data-page="config"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h10m4 0h2M4 12h2m4 0h10M4 18h8m4 0h4"/><circle cx="16" cy="6" r="2"/><circle cx="8" cy="12" r="2"/><circle cx="14" cy="18" r="2"/></svg>Configuration</button>
-    <button data-page="activity"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9a6 6 0 0 1 12 0c0 7 3 8 3 8H3s3-1 3-8m4 12h4"/></svg>Activity</button>
+  <nav id="pages">
+    <button class="nav-item active" data-page="assets"><span class="emoji">🚀</span><span class="nav-text">Manage Assets</span></button>
+    <button class="nav-item" data-page="accounts"><span class="emoji">👥</span><span class="nav-text">Manage Accounts</span></button>
+    <button class="nav-item" data-page="usage"><span class="emoji">📊</span><span class="nav-text">Daily Usage</span></button>
+    <button class="nav-item" data-page="config"><span class="emoji">⚙️</span><span class="nav-text">Configuration</span></button>
+    <button class="nav-item" data-page="activity"><span class="emoji">🔔</span><span class="nav-text">Notifications</span><span class="badge" id="badge" hidden>0</span></button>
   </nav>
   <div class="nav-label">Links</div>
-  <nav>
-    <a href="#" id="discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5Z"/></svg>Discord: goatranji_w</a>
-  </nav>
+  <a href="#" class="nav-item" id="discord"><span class="emoji">💬</span><span class="nav-text">Discord: goatranji_w</span></a>
   <div class="me">
     <img id="meAvatar" alt="">
     <div><b id="meName">Loading...</b><small id="meId"></small></div>
@@ -150,98 +184,141 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
 
   <div class="page active" id="page-assets">
     <div class="tabs">
-      <button data-tab="plugin" class="active">Studio Plugin</button>
+      <button data-tab="plugin" class="active">Studio Plugin (Recommended)</button>
       <button data-tab="file">.RBXL File</button>
     </div>
 
     <div class="tabpage active" id="tab-plugin">
       <h2>Connect with Studio Plugin</h2>
       <p class="sub">Connect KrazySpoofer to Roblox Studio</p>
+
       <div class="card">
-        <h3>Step 1: Install the Plugin</h3>
-        <p>Install the Uploaderv3Newest plugin in Roblox Studio. Skip this step if you already installed it.</p>
+        <h3>📦 Step 1: Install the Plugin</h3>
+        <p>Install the plugin in Roblox Studio to get started. Skip this step if you already installed it.</p>
         <div class="steps">
-          <div class="step"><b>Install it for me</b><p>Copies the plugin into your Studio plugins folder.</p><button class="btn" id="installPlugin">Install Plugin</button></div>
-          <div class="step"><b>Open your plugin folder</b><p>See what's installed, or remove an older copy.</p><button class="btn primary" id="openPlugins">Open Plugin Folder</button></div>
+          <div class="step">
+            <span class="num">↘</span>
+            <div><b>Install it for me</b><p>Installs the plugin into Roblox Studio automatically.</p>
+              <button class="big dark" id="installPlugin"><span class="emoji">📦</span>Install Plugin</button></div>
+          </div>
+          <div class="divider"></div>
+          <div class="steps-right">
+            <div class="step">
+              <span class="num">1</span>
+              <div><b>Open your plugin folder</b><p>So you can drop the plugin file in.</p>
+                <button class="big blue" id="openPlugins"><span class="emoji">📁</span>Open Plugin Folder</button></div>
+            </div>
+            <div class="step">
+              <span class="num">2</span>
+              <div><b>Add the plugin file</b><p>Save this file into the plugin folder.</p>
+                <a class="big file" href="/app/plugin.rbxm" download="Uploaderv3Newest.rbxm"><span class="emoji">🧩</span>Uploaderv3Newest.rbxm</a></div>
+            </div>
+          </div>
         </div>
+        <div class="step wide"><span class="num">3</span><div><b>Relaunch Roblox Studio</b><p>Relaunch Roblox Studio and open your game.</p></div></div>
         <div class="message" id="pluginMessage"></div>
       </div>
+
       <div class="card">
-        <h3>Step 2: Reupload from Studio</h3>
-        <p>Keep this app open, then open your game in Studio and use the Uploaderv3Newest toolbar button. Progress shows in Activity.</p>
+        <h3>🔌 Step 2: Connect to Studio</h3>
+        <p>Open the plugin in Roblox Studio and start a reupload. It connects automatically.</p>
+        <div class="status">
+          <span class="dot" id="pluginDot"></span>
+          <div><b id="pluginState">Disconnected</b><small id="pluginHint">Waiting for connection...</small></div>
+        </div>
       </div>
     </div>
 
     <div class="tabpage" id="tab-file">
-      <h2>Reupload a Place File</h2>
-      <p class="sub">Saves a new copy in the Reuploaded folder. Your original file is never changed.</p>
-      <div class="card">
-        <label class="drop" id="drop">
-          <input type="file" id="file" accept=".rbxl,.rbxlx">
-          <span id="dropText">Drop a .rbxl or .rbxlx here, or click to choose one</span>
-        </label>
-        <div id="summary"></div>
+      <h2>Choose File</h2>
+      <p class="sub">Your original file is never changed. A new copy is saved in the Reuploaded folder.</p>
+
+      <label class="drop" id="drop">
+        <input type="file" id="file" accept=".rbxl,.rbxlx">
+        <span class="folder">📁</span>
+        <span id="dropText">Drag &amp; Drop your file here</span>
+        <span id="dropBrowse">or <u>click to browse</u></span>
+        <small>Supported formats: .rbxl, .rbxlx</small>
+      </label>
+      <div id="summary"></div>
+
+      <h4>Types to retrieve</h4>
+      <div class="chip-groups">
+        <div><small>Assets</small><div class="chips">
+          <button class="chip active" data-type="Sound">Sounds</button>
+          <button class="chip active" data-type="Animation">Animations</button>
+          <button class="chip active" data-type="Mesh">Meshes</button>
+        </div></div>
+        <div><small>Products</small><div class="chips">
+          <button class="chip" data-product>Gamepasses</button>
+          <button class="chip" data-product>Developer Products</button>
+        </div></div>
       </div>
-      <div class="card">
-        <div class="fields">
-          <label class="field">Your game (optional)<small>Pick one, enter a place ID, or leave empty</small>
-            <select id="gamePick"><option value="">No game, upload to my account</option></select>
-            <input type="text" id="placeId" inputmode="numeric" autocomplete="off" placeholder="Place ID">
-          </label>
-          <label class="field">Share with user ID<small>They must be your friend</small><input type="text" id="shareUser" inputmode="numeric" autocomplete="off"></label>
-          <label class="field">Share with group ID<small>Optional</small><input type="text" id="shareGroup" inputmode="numeric" autocomplete="off"></label>
-        </div>
-        <div class="checks">
-          <label class="check"><input type="checkbox" value="Animation" class="type" checked> Animations</label>
-          <label class="check"><input type="checkbox" value="Sound" class="type" checked> Audio</label>
-          <label class="check"><input type="checkbox" value="Mesh" class="type" checked> Meshes</label>
-        </div>
+
+      <h4>Your game (optional)</h4>
+      <div class="fields">
+        <label class="field"><small>Pick a game, or leave empty to upload to your account</small>
+          <select id="gamePick"><option value="">No game, upload to my account</option></select></label>
+        <label class="field"><small>Or enter a place ID</small><input type="text" id="placeId" inputmode="numeric" autocomplete="off" placeholder="e.g., 123456789"></label>
       </div>
-      <div class="card" id="productsPanel" hidden>
+
+      <h4>Share with (optional)</h4>
+      <div class="fields">
+        <label class="field"><small>User ID, they must be your friend</small><input type="text" id="shareUser" inputmode="numeric" autocomplete="off" placeholder="e.g., 123456789"></label>
+        <label class="field"><small>Group ID</small><input type="text" id="shareGroup" inputmode="numeric" autocomplete="off" placeholder="e.g., 123456789"></label>
+      </div>
+
+      <div class="card" id="productsPanel" style="margin-top:18px" hidden>
         <h3>Gamepasses and Developer Products</h3>
         <p id="productsHint"></p>
         <div class="items" id="items"></div>
       </div>
-      <div class="card">
-        <div class="actions">
-          <button class="btn" id="scan" disabled>Find Gamepasses &amp; Products</button>
-          <button class="btn primary" id="start" disabled>Start Reupload</button>
-          <button class="btn" id="cancel" disabled>Cancel</button>
-          <button class="btn" id="show" hidden>Show Saved File</button>
-        </div>
-        <div class="bar"><div id="progress"></div></div>
-        <div class="message" id="message"></div>
+
+      <div style="margin-top:20px">
+        <button class="btn primary wide" id="analyze" disabled>Analyze</button>
+        <button class="btn wide" id="cancel" style="margin-top:8px" hidden>Cancel</button>
+        <button class="btn wide" id="show" style="margin-top:8px" hidden>Show Saved File</button>
       </div>
+      <div class="bar"><div id="progress"></div></div>
+      <div class="message" id="message"></div>
     </div>
   </div>
 
   <div class="page" id="page-accounts">
-    <h2>My Account</h2>
-    <p class="sub">The account used to download and upload</p>
-    <div class="account">
+    <h2>My Cookies</h2>
+    <p class="sub">The account that downloads assets</p>
+    <div class="table-head"><span></span><span>Username</span><span>UserId</span><span></span></div>
+    <div class="row">
       <img id="accountAvatar" alt="">
-      <div><small>Username</small><span id="accountName"></span></div>
-      <div><small>UserId</small><span id="accountId"></span></div>
+      <span id="accountName"></span>
+      <span id="accountId"></span>
+      <span class="tag good">Logged in</span>
     </div>
-    <h2>My API Key</h2>
-    <p class="sub">Open Cloud key, stored in api-key.txt next to the exe</p>
-    <div class="account">
-      <div><small>Status</small><span class="tag" id="apiKey"></span></div>
+    <hr>
+    <h2>My API Keys</h2>
+    <p class="sub">The key that uploads assets</p>
+    <div class="table-head"><span></span><span>Username</span><span>UserId</span><span>Status</span></div>
+    <div class="row">
+      <img id="keyAvatar" alt="">
+      <span id="keyName"></span>
+      <span id="keyId"></span>
+      <span class="tag" id="apiKey"></span>
     </div>
+    <button class="btn primary wide" id="addAccount">Update Account</button>
   </div>
 
   <div class="page" id="page-usage">
     <h2>Daily Usage</h2>
-    <p class="sub">What you've reuploaded today</p>
+    <p class="sub">Track what you've reuploaded today</p>
     <div class="stats">
       <div class="stat"><small>Reuploaded today</small><b id="usageTotal">0</b></div>
-      <div class="stat"><small>Audio this period</small><b id="usageAudio">-</b></div>
+      <div class="stat"><small>Daily count resets in</small><b id="usageReset">-</b></div>
+      <div class="stat"><small>Audio limit used</small><b id="usageAudio">-</b></div>
     </div>
     <div class="card">
-      <h3>Today</h3>
+      <h3>Your Daily Usage</h3>
+      <p style="margin:0">Your usage today, compared across types</p>
       <div id="usageRows"></div>
-      <div class="usage" style="margin-top:22px">Audio upload limit <span id="quotaText">Not available</span></div>
-      <div class="bar"><div id="quotaBar"></div></div>
     </div>
   </div>
 
@@ -250,25 +327,54 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
     <p class="sub">Configure application settings</p>
     <label class="setting"><input type="checkbox" id="skipOwned"> Skip assets you already own</label>
     <label class="setting"><input type="checkbox" id="skipPublic"> Skip public assets</label>
-    <div class="config-field"><b>Comma separated list of group IDs to skip</b><small>Assets from these groups are not reuploaded</small><input type="text" id="skipGroups" placeholder="e.g., 123,456,789"></div>
-    <div class="config-field"><b>Comma separated list of user IDs to skip</b><small>Assets from these users are not reuploaded</small><input type="text" id="skipUsers" placeholder="e.g., 123,456,789"></div>
-    <div class="config-field"><b>Custom Product Description</b><small>Replaces gamepass and developer product descriptions. Leave empty to keep the originals.</small><textarea id="productDescription" placeholder="Enter a custom product description..."></textarea></div>
-    <div style="margin-top:20px"><button class="btn primary" id="saveConfig">Save</button></div>
+    <div class="config-field"><b>Comma separated list of group IDs to skip</b><input type="text" id="skipGroups" placeholder="e.g., 123,456,789"></div>
+    <div class="config-field"><b>Comma separated list of user IDs to skip</b><input type="text" id="skipUsers" placeholder="e.g., 123,456,789"></div>
+    <div class="config-field"><b>Custom Product Description</b><small>Replaces the description on gamepasses and developer products</small><textarea id="productDescription" placeholder="Enter a custom product description..."></textarea></div>
+    <div style="margin-top:18px"><button class="btn primary" id="saveConfig">Save</button></div>
     <div class="message" id="configMessage"></div>
   </div>
 
   <div class="page" id="page-activity">
-    <h2>Activity</h2>
+    <h2>Notifications</h2>
     <p class="sub">Live log from this app</p>
     <pre id="log"></pre>
   </div>
 </main>
 
+<div class="overlay" id="modal" hidden>
+  <div class="modal">
+    <div id="modalChoice">
+      <h3>Update Account</h3>
+      <p>KrazySpoofer uses one account, which needs:</p>
+      <ol>
+        <li>A valid .ROBLOSECURITY cookie for downloading assets</li>
+        <li>A valid API key for uploading assets</li>
+      </ol>
+      <p>Choose what to update:</p>
+      <div class="choice">
+        <button class="btn" data-secret="cookie">Cookie</button>
+        <button class="btn" data-secret="apikey">API Key</button>
+      </div>
+    </div>
+    <div id="modalForm" hidden>
+      <h3 id="modalTitle"></h3>
+      <input type="password" id="secret" autocomplete="off" spellcheck="false">
+      <div class="message" id="modalMessage"></div>
+      <div class="choice">
+        <button class="btn" id="modalBack">Back</button>
+        <button class="btn primary" id="modalSave">Save</button>
+      </div>
+    </div>
+    <div style="margin-top:12px"><button class="btn wide" id="modalClose">Close</button></div>
+  </div>
+</div>
+
 <script>
 const token = "__TOKEN__";
 const $ = id => document.getElementById(id);
 const headers = { "X-KrazySpoofer-Token": token };
-let lineCount = 0, shownItems = "", lastState = "";
+let lineCount = 0, shownItems = "", lastState = "", lastStatus = { state: "idle" };
+let unread = 0, modalKind = "";
 
 function say(text, ok, id) {
   const box = $(id || "message");
@@ -287,10 +393,16 @@ async function getJSON(path) {
   return response.json();
 }
 
-document.querySelectorAll("nav button").forEach(button => button.addEventListener("click", () => {
-  document.querySelectorAll("nav button").forEach(b => b.classList.toggle("active", b === button));
+function setBadge() {
+  $("badge").textContent = unread;
+  $("badge").hidden = unread === 0;
+}
+
+document.querySelectorAll("#pages .nav-item").forEach(button => button.addEventListener("click", () => {
+  document.querySelectorAll("#pages .nav-item").forEach(b => b.classList.toggle("active", b === button));
   document.querySelectorAll(".page").forEach(p => p.classList.toggle("active", p.id === "page-" + button.dataset.page));
   if (button.dataset.page === "usage") loadUsage();
+  if (button.dataset.page === "activity") { unread = 0; setBadge(); }
 }));
 
 document.querySelectorAll(".tabs button").forEach(button => button.addEventListener("click", () => {
@@ -298,12 +410,19 @@ document.querySelectorAll(".tabs button").forEach(button => button.addEventListe
   document.querySelectorAll(".tabpage").forEach(p => p.classList.toggle("active", p.id === "tab-" + button.dataset.tab));
 }));
 
+document.querySelectorAll(".chip").forEach(chip => chip.addEventListener("click", () => {
+  chip.classList.toggle("active");
+  render(lastStatus);
+}));
+
+const wantsProducts = () => document.querySelectorAll(".chip[data-product].active").length > 0;
+
 async function openFile(file) {
   if (!file) return;
   say("");
   $("dropText").textContent = "Reading " + file.name + "...";
   const response = await post("open", { body: file, headers: { "X-File-Name": encodeURIComponent(file.name) } });
-  if (!response.ok) $("dropText").textContent = "Drop a .rbxl or .rbxlx here, or click to choose one";
+  if (!response.ok) $("dropText").textContent = "Drag & Drop your file here";
   refresh();
 }
 
@@ -316,11 +435,6 @@ for (const id of ["placeId", "shareUser", "shareGroup"]) {
   $(id).addEventListener("input", () => { $(id).value = $(id).value.replace(/\D/g, ""); });
 }
 
-$("discord").addEventListener("click", e => {
-  e.preventDefault();
-  post("discord");
-});
-
 $("gamePick").addEventListener("change", () => { $("placeId").value = $("gamePick").value; });
 $("placeId").addEventListener("input", () => { $("gamePick").value = [...$("gamePick").options].some(o => o.value === $("placeId").value) ? $("placeId").value : ""; });
 
@@ -330,25 +444,35 @@ async function loadGames() {
   }
 }
 
+$("discord").addEventListener("click", e => {
+  e.preventDefault();
+  post("discord");
+});
+
 $("installPlugin").addEventListener("click", async () => {
   const response = await post("plugin/install", {}, "pluginMessage");
   if (response.ok) say(await response.text(), true, "pluginMessage");
 });
 $("openPlugins").addEventListener("click", () => post("plugin/folder", {}, "pluginMessage"));
-$("scan").addEventListener("click", () => { say(""); post("scan"); });
 $("cancel").addEventListener("click", () => post("cancel"));
 $("show").addEventListener("click", () => post("show"));
-$("start").addEventListener("click", () => {
-  say("");
+
+function startReupload() {
   const picked = kind => [...document.querySelectorAll("input[data-kind=" + kind + "]:checked")].map(i => Number(i.value));
   post("start", { body: JSON.stringify({
     placeId: Number($("placeId").value),
     shareUserId: Number($("shareUser").value),
     shareGroupId: Number($("shareGroup").value),
-    assetTypes: [...document.querySelectorAll(".type:checked")].map(i => i.value),
+    assetTypes: [...document.querySelectorAll(".chip[data-type].active")].map(c => c.dataset.type),
     gamePasses: picked("pass"),
     products: picked("product"),
   }) });
+}
+
+$("analyze").addEventListener("click", () => {
+  say("");
+  if (wantsProducts() && lastStatus.state === "opened") post("scan");
+  else startReupload();
 });
 
 const parseIDs = text => text.split(",").map(v => Number(v.trim())).filter(v => Number.isInteger(v) && v > 0);
@@ -377,37 +501,75 @@ async function loadAccount() {
   const account = await getJSON("account");
   $("meName").textContent = "@" + (account.username || "unknown");
   $("meId").textContent = account.id;
-  $("accountName").textContent = account.username;
-  $("accountId").textContent = account.id;
-  if (account.avatar) $("meAvatar").src = $("accountAvatar").src = account.avatar;
+  for (const id of ["accountName", "keyName"]) $(id).textContent = account.username;
+  for (const id of ["accountId", "keyId"]) $(id).textContent = account.id;
+  if (account.avatar) for (const id of ["meAvatar", "accountAvatar", "keyAvatar"]) $(id).src = account.avatar;
   $("apiKey").textContent = account.hasApiKey ? "Key saved" : "No key";
   $("apiKey").className = "tag " + (account.hasApiKey ? "on" : "off");
 }
 
+function showModal(form) {
+  $("modalChoice").hidden = form;
+  $("modalForm").hidden = !form;
+  $("secret").value = "";
+  say("", false, "modalMessage");
+}
+
+$("addAccount").addEventListener("click", () => { showModal(false); $("modal").hidden = false; });
+$("modalClose").addEventListener("click", () => { $("secret").value = ""; $("modal").hidden = true; });
+$("modalBack").addEventListener("click", () => showModal(false));
+document.querySelectorAll("[data-secret]").forEach(button => button.addEventListener("click", () => {
+  modalKind = button.dataset.secret;
+  $("modalTitle").textContent = modalKind === "cookie" ? "Paste your .ROBLOSECURITY cookie" : "Paste your API key";
+  showModal(true);
+  $("secret").focus();
+}));
+$("modalSave").addEventListener("click", async () => {
+  if (!$("secret").value) return;
+  say("Checking...", true, "modalMessage");
+  const response = await post("account/" + modalKind, { body: $("secret").value }, "modalMessage");
+  if (!response.ok) return;
+  $("secret").value = "";
+  $("modal").hidden = true;
+  loadAccount();
+});
+
 const usageLabels = { Animation: "Animations", Sound: "Audio", Mesh: "Meshes", GamePass: "Gamepasses", DeveloperProduct: "Developer Products" };
+
+function timeUntilMidnight() {
+  const now = new Date(), midnight = new Date(now);
+  midnight.setHours(24, 0, 0, 0);
+  const minutes = Math.ceil((midnight - now) / 60000);
+  return Math.floor(minutes / 60) + "h " + (minutes % 60) + "m";
+}
 
 async function loadUsage() {
   const usage = await getJSON("usage");
+  const counts = Object.keys(usageLabels).map(type => usage.today[type] || 0);
+  const total = counts.reduce((a, b) => a + b, 0);
+  const highest = Math.max(1, ...counts);
+
   $("usageRows").textContent = "";
-  let total = 0;
-  for (const [type, label] of Object.entries(usageLabels)) {
-    const count = usage.today[type] || 0;
-    total += count;
+  Object.values(usageLabels).forEach((label, i) => {
     const row = document.createElement("div");
     row.className = "usage";
-    row.textContent = label;
+    const title = document.createElement("div");
+    title.textContent = label;
     const value = document.createElement("span");
-    value.textContent = count + " today";
-    row.append(value);
+    value.textContent = "Used " + counts[i] + " today";
+    title.append(value);
+    const bar = document.createElement("div");
+    bar.className = "bar";
+    const fill = document.createElement("div");
+    fill.style.width = 100 * counts[i] / highest + "%";
+    bar.append(fill);
+    row.append(title, bar);
     $("usageRows").append(row);
-  }
-  $("usageTotal").textContent = total;
+  });
 
-  if (usage.quota) {
-    $("usageAudio").textContent = usage.quota.usage + " / " + usage.quota.capacity;
-    $("quotaText").textContent = "Used " + usage.quota.usage + " of " + usage.quota.capacity;
-    $("quotaBar").style.width = Math.min(100, 100 * usage.quota.usage / usage.quota.capacity) + "%";
-  }
+  $("usageTotal").textContent = total;
+  $("usageReset").textContent = timeUntilMidnight();
+  if (usage.quota) $("usageAudio").textContent = usage.quota.usage + " / " + usage.quota.capacity;
 }
 
 function addLine(line) {
@@ -416,6 +578,11 @@ function addLine(line) {
   if (color) row.className = "c" + color[1];
   row.textContent = line.replace(/\x1b\[[0-9;]*m/g, "");
   $("log").append(row);
+
+  if (color && color[1] === "31" && !$("page-activity").classList.contains("active")) {
+    unread++;
+    setBadge();
+  }
   const progress = row.textContent.match(/\[(\d+)(?:-\d+)?\/(\d+)\]/);
   if (progress) $("progress").style.width = Math.min(100, 100 * progress[1] / progress[2]) + "%";
 }
@@ -451,27 +618,33 @@ function showItems(status) {
 }
 
 function render(status) {
+  lastStatus = status;
   const state = status.state, running = state === "running" || state === "scanning";
   const hasFile = state !== "idle";
 
   if (hasFile) {
     $("dropText").textContent = status.fileName || "Place file";
+    $("dropBrowse").hidden = true;
     let text = status.idCount + " possible IDs found.";
     if (status.quota) text += " Audio uploads used: " + status.quota.usage + "/" + status.quota.capacity + ".";
     if (status.unreadable) text += " " + status.unreadable + " attribute sets could not be read and will not change.";
     $("summary").textContent = text;
   }
 
-  $("scan").disabled = !hasFile || running;
-  $("start").disabled = !hasFile || running;
-  $("cancel").disabled = !running;
+  $("analyze").disabled = !hasFile || running;
+  $("analyze").textContent = wantsProducts() && state === "opened" ? "Analyze" : "Start Reupload";
+  $("cancel").hidden = !running;
   $("show").hidden = !status.output;
+
+  $("pluginDot").classList.toggle("on", !!status.pluginConnected);
+  $("pluginState").textContent = status.pluginConnected ? "Connected" : "Disconnected";
+  $("pluginHint").textContent = status.pluginConnected ? "Studio is talking to the app." : "Waiting for connection...";
 
   if (state === "scanning") {
     say(status.scanTotal ? "Checking " + status.scanDone + "/" + status.scanTotal + " numbers..." : "Checking which IDs are assets...", true);
     if (status.scanTotal) $("progress").style.width = 100 * status.scanDone / status.scanTotal + "%";
   } else if (state === "running") {
-    say("Reuploading... See Activity for details.", true);
+    say("Reuploading... See Notifications for details.", true);
   } else if (lastState && lastState !== state) {
     if (status.error) say(status.error);
     else if (status.output) say("Done. Saved to " + status.output, true);

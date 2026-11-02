@@ -16,6 +16,8 @@ import (
 	"runtime"
 	"strings"
 	"sync"
+	"sync/atomic"
+	"time"
 
 	"github.com/kenshiro716/KrazySpoofer/internal/app/assets/shared/assetutils"
 	"github.com/kenshiro716/KrazySpoofer/internal/app/config"
@@ -40,6 +42,13 @@ var appIcon []byte
 var pluginFile []byte
 
 const discordProfile = "https://discord.com/users/1194772491562926211"
+
+// lastPluginPoll is when the Studio plugin last spoke to this executable.
+var lastPluginPoll atomic.Int64
+
+const pluginConnectedWindow = 10 * time.Second
+
+const maxSecretSize = 16 << 10
 
 const (
 	maxPlaceFileSize = 2 << 30
@@ -69,6 +78,8 @@ type appStatus struct {
 	Error      string                `json:"error"`
 	Lines      []string              `json:"lines"`
 	LineCount  int                   `json:"lineCount"`
+
+	PluginConnected bool `json:"pluginConnected"`
 }
 
 // appServer is the state behind the app window. Only one place file is open at a time.
@@ -114,7 +125,8 @@ func (a *appServer) allowed(w http.ResponseWriter, r *http.Request) bool {
 		w.WriteHeader(http.StatusForbidden)
 		return false
 	}
-	if r.URL.Path != "/app" && r.URL.Path != "/app/icon.png" && r.Header.Get("X-KrazySpoofer-Token") != a.token {
+	public := r.URL.Path == "/app" || r.URL.Path == "/app/icon.png" || r.URL.Path == "/app/plugin.rbxm"
+	if !public && r.Header.Get("X-KrazySpoofer-Token") != a.token {
 		w.WriteHeader(http.StatusForbidden)
 		return false
 	}
@@ -319,6 +331,7 @@ func (a *appServer) statusHandler(w http.ResponseWriter, r *http.Request) {
 		status.State = appIdle
 	}
 	status.LineCount = len(a.lines)
+	status.PluginConnected = time.Since(time.Unix(lastPluginPoll.Load(), 0)) < pluginConnectedWindow
 	if after < len(a.lines) {
 		status.Lines = append([]string(nil), a.lines[after:]...)
 	}
@@ -408,6 +421,47 @@ func (a *appServer) games(w http.ResponseWriter, _ *http.Request) {
 	}
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(list)
+}
+
+func (a *appServer) setCookie(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxSecretSize))
+	if err != nil {
+		writeError(w, "That cookie is too long.")
+		return
+	}
+
+	previous := a.client.Cookie
+	if err := a.client.SetCookie(strings.TrimSpace(string(body))); err != nil {
+		a.client.Cookie = previous
+		writeError(w, "That cookie did not work: "+err.Error())
+		return
+	}
+	if err := saveCookieFile(a.client.Cookie); err != nil {
+		writeError(w, "Logged in, but the cookie could not be saved: "+err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+}
+
+func (a *appServer) setAPIKey(w http.ResponseWriter, r *http.Request) {
+	body, err := io.ReadAll(http.MaxBytesReader(w, r.Body, maxSecretSize))
+	if err != nil {
+		writeError(w, "That key is too long.")
+		return
+	}
+
+	key := strings.TrimSpace(string(body))
+	if key == "" {
+		writeError(w, "Paste an API key.")
+		return
+	}
+
+	config.Set("api_key", key)
+	if err := config.PersistAPIKey(); err != nil {
+		writeError(w, "The key could not be saved: "+err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
 }
 
 func (a *appServer) usage(w http.ResponseWriter, _ *http.Request) {
@@ -503,6 +557,13 @@ func registerApp(c *roblox.Client) {
 		openInChrome(discordProfile)
 		w.WriteHeader(http.StatusOK)
 	})
+	app.handle("GET /app/plugin.rbxm", func(w http.ResponseWriter, _ *http.Request) {
+		w.Header().Set("Content-Type", "application/octet-stream")
+		w.Header().Set("Content-Disposition", `attachment; filename="Uploaderv3Newest.rbxm"`)
+		w.Write(pluginFile)
+	})
+	app.handle("POST /app/api/account/cookie", app.setCookie)
+	app.handle("POST /app/api/account/apikey", app.setAPIKey)
 	app.handle("POST /app/api/open", app.open)
 	app.handle("GET /app/api/account", app.account)
 	app.handle("GET /app/api/usage", app.usage)
