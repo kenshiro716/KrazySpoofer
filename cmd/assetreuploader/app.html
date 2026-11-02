@@ -134,7 +134,7 @@ input[type=checkbox] { accent-color: var(--accent); width: 18px; height: 18px; }
   </nav>
   <div class="nav-label">Links</div>
   <nav>
-    <a href="#" id="discord" title="Click to copy"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5Z"/></svg><span id="discordText">Discord: goatranji_w</span></a>
+    <a href="#" id="discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5Z"/></svg>Discord: goatranji_w</a>
   </nav>
   <div class="me">
     <img id="meAvatar" alt="">
@@ -316,15 +316,9 @@ for (const id of ["placeId", "shareUser", "shareGroup"]) {
   $(id).addEventListener("input", () => { $(id).value = $(id).value.replace(/\D/g, ""); });
 }
 
-$("discord").addEventListener("click", async e => {
+$("discord").addEventListener("click", e => {
   e.preventDefault();
-  try {
-    await navigator.clipboard.writeText("goatranji_w");
-    $("discordText").textContent = "Copied!";
-  } catch {
-    $("discordText").textContent = "goatranji_w";
-  }
-  setTimeout(() => { $("discordText").textContent = "Discord: goatranji_w"; }, 1500);
+  post("discord");
 });
 
 $("gamePick").addEventListener("change", () => { $("placeId").value = $("gamePick").value; });

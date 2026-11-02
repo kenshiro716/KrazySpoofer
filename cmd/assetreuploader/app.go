@@ -39,6 +39,8 @@ var appIcon []byte
 //go:embed plugin.rbxm
 var pluginFile []byte
 
+const discordProfile = "https://discord.com/users/1194772491562926211"
+
 const (
 	maxPlaceFileSize = 2 << 30
 	maxAppLogLines   = 5000
@@ -446,6 +448,27 @@ func (a *appServer) showOutput(w http.ResponseWriter, _ *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+func findChrome() string {
+	for _, folder := range []string{os.Getenv("ProgramFiles"), os.Getenv("ProgramFiles(x86)"), os.Getenv("LOCALAPPDATA")} {
+		path := filepath.Join(folder, "Google", "Chrome", "Application", "chrome.exe")
+		if _, err := os.Stat(path); err == nil {
+			return path
+		}
+	}
+	return ""
+}
+
+// openInChrome falls back to the default browser if Chrome is not installed.
+func openInChrome(address string) {
+	if runtime.GOOS != "windows" {
+		return
+	}
+	if chrome := findChrome(); chrome != "" && exec.Command(chrome, address).Start() == nil {
+		return
+	}
+	exec.Command("rundll32", "url.dll,FileProtocolHandler", address).Start()
+}
+
 // openAppInBrowser is the fallback for PCs without the WebView2 runtime.
 func openAppInBrowser(address string) {
 	if runtime.GOOS != "windows" {
@@ -475,6 +498,10 @@ func registerApp(c *roblox.Client) {
 	app.handle("GET /app/icon.png", func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "image/png")
 		w.Write(appIcon)
+	})
+	app.handle("POST /app/api/discord", func(w http.ResponseWriter, _ *http.Request) {
+		openInChrome(discordProfile)
+		w.WriteHeader(http.StatusOK)
 	})
 	app.handle("POST /app/api/open", app.open)
 	app.handle("GET /app/api/account", app.account)
